@@ -1,16 +1,16 @@
 :root {
-  --white: oklch(1 0 0);
-  --black: oklch(0.18 0 0);
+  --white: oklch(0.975 0 0);
+  --black: oklch(0.22 0 0);
   --red: oklch(0.62 0.24 25);
   --dark-blue: oklch(0.28 0.08 260);
   --darker-blue: oklch(0.2 0.07 260);
   --section-pad: clamp(1rem, 1.6vw, 1.5rem);
   --menu-pad: clamp(1.2rem, 2vw, 1.8rem);
   --grid-gutter: clamp(0.5rem, 1vw, 1rem);
-  --l-text: clamp(3.5rem, 6vw, 5rem);
-  --m-text: clamp(2.5rem, 4.5vw, 4rem);
-  --s-text: clamp(2rem, 3.5vw, 3rem);
-  --xs-text: clamp(1rem, 2vw, 2rem);
+  --l-text: clamp(2rem, 6vw, 5rem);
+  --m-text: clamp(1.5rem, 4.5vw, 4rem);
+  --s-text: clamp(1rem, 3.5vw, 3rem);
+  --xs-text: clamp(0.7rem, 2vw, 1.5rem);
 }
 
 *,
@@ -25,6 +25,7 @@ body {
   min-height: 100%;
   margin: 0;
   scroll-behavior: auto;
+  background-color: var(--white);
 }
 
 
@@ -66,6 +67,9 @@ body.is-loaded {
   display: grid;
   place-items: center;
   background: var(--black);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .loader-logo {
@@ -86,7 +90,7 @@ main {
 .site-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 15rem;
+  gap: clamp(5rem, 10vw, 15rem);
 }
 
 .grid-overlay {
@@ -120,11 +124,15 @@ main {
   justify-content: space-between;
   min-height: 44px;
   z-index: 1500;
+  color: var(--white);
+  mix-blend-mode: difference;
 }
 
 .hero-logo-link {
   display: inline-flex;
   align-items: center;
+  color: var(--white);
+  text-decoration: none;
 }
 
 .hero-logo {
@@ -132,13 +140,8 @@ main {
   height: 30px;
   width: auto;
   fill: currentColor;
-  color: var(--white);
+  color: inherit;
   overflow: visible;
-}
-
-.hero-logo-link,
-.menu-toggle {
-  mix-blend-mode: exclusion;
 }
 
 .hero-logo rect {
@@ -167,6 +170,11 @@ main {
   background: currentColor;
 }
 
+.hero-logo,
+.menu-toggle span {
+  mix-blend-mode: normal;
+}
+
 .hero-media-wrap {
   height: 100%;
   border-radius: 0.8rem;
@@ -179,6 +187,24 @@ main {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.hero-title {
+  position: absolute;
+  left: 4rem;
+  right: 4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  margin: 0;
+  color: var(--white);
+  text-align: left;
+  mix-blend-mode: normal;
+}
+
+.textplugin-word {
+  display: inline-block;
+  min-width: 6ch;
 }
 
 .site-menu {
@@ -301,6 +327,21 @@ main {
 .menu-char {
   display: inline-block;
   text-shadow: 0 1em 0 var(--red);
+}
+
+.spanlink {
+  display: inline-block;
+  background: var(--white);
+  color: var(--black);
+  text-decoration: none;
+  mix-blend-mode: difference;
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+.spanlink:hover,
+.spanlink:focus-visible {
+  background: var(--black);
+  color: var(--white);
 }
 
 .content-section {

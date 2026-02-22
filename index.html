@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>jonas _][_ lindeman</title>
-    <link rel="preload" as="image" href="./Assets/Images/hero.avif" />
-    <link rel="preload" as="image" href="./Assets/Images/img2.avif" />
+    <link rel="preload" as="image" href="./Assets/Images/hero.jpg" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -30,10 +29,12 @@
     </div>
 
     <div data-barba="container" data-barba-namespace="main">
+      <!--
       <div class="grid-overlay" aria-hidden="true">
         <span></span><span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span><span></span><span></span>
       </div>
+      -->
       <main>
         <div class="site-wrapper">
           <section class="hero" id="hero-start">
@@ -72,7 +73,7 @@
             <div class="hero-media-wrap">
               <img
                 class="hero-media"
-                src="./Assets/Images/hero.avif"
+                src="./Assets/Images/hero.jpg"
                 loading="eager"
                 fetchpriority="high"
                 alt="Portfolio hero image"
@@ -83,9 +84,15 @@
           <section class="content-section section-center">
             <div class="content-text-block w-large text-center">
               <p class="m-text">
-                I’m a digital designer building high-impact experiences with sharp motion in
-                GSAP and fast, scalable low-code products that turn ideas into polished
-                launches.
+                  Hi! My name is Jonas _][_ Lindeman and I'm a Digital Designer at
+                <a
+                  class="spanlink"
+                  href="https://ebbscandinavia.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  EBB Scandinavia
+                </a>
               </p>
             </div>
           </section>
@@ -95,7 +102,7 @@
               <div class="image-row row-3">
                 <img
                   class="image-col-3"
-                  src="./Assets/Images/img1.avif"
+                  src="./Assets/Images/image1.webp"
                   alt="Gallery image one"
                 />
               </div>
@@ -103,7 +110,7 @@
               <div class="image-row row-3">
                 <img
                   class="image-col-1-2"
-                  src="./Assets/Images/img2.avif"
+                  src="./Assets/Images/image2.webp"
                   alt="Gallery image four"
                 />
               </div>
@@ -111,7 +118,7 @@
               <div class="image-row row-3">
                 <img
                   class="image-col-3"
-                  src="./Assets/Images/img3.avif"
+                  src="./Assets/Images/image3.webp"
                   alt="Gallery image five"
                 />
               </div>
@@ -119,7 +126,7 @@
               <div class="image-row row-3">
                 <img
                   class="image-col-2"
-                  src="./Assets/Images/img4.avif"
+                  src="./Assets/Images/image4.webp"
                   alt="Gallery image six"
                 />
               </div>
@@ -138,17 +145,17 @@
 
           <div class="menu-content">
             <nav class="menu-nav" aria-label="Menu">
-              <a href="./index.html#hero-start" class="menu-link menu-link-big">Work</a>
+              <a href="./index.html" class="menu-link menu-link-big">Work</a>
               <a href="./about.html" class="menu-link menu-link-big">About</a>
-              <a href="./index.html#hero-start" class="menu-link menu-link-big">Services</a>
-              <a href="./index.html#hero-start" class="menu-link menu-link-big">Contact</a>
+              <a href="./index.html" class="menu-link menu-link-big">Services</a>
+              <a href="./index.html" class="menu-link menu-link-big">Contact</a>
             </nav>
 
             <div class="menu-subnav">
-              <a href="./index.html#hero-start" class="menu-link menu-link-small">Instagram</a>
-              <a href="./index.html#hero-start" class="menu-link menu-link-small">LinkedIn</a>
-              <a href="./index.html#hero-start" class="menu-link menu-link-small">Dribbble</a>
-              <a href="./index.html#hero-start" class="menu-link menu-link-small">Email</a>
+              <a href="./index.html" class="menu-link menu-link-small">Instagram</a>
+              <a href="./index.html" class="menu-link menu-link-small">LinkedIn</a>
+              <a href="./index.html" class="menu-link menu-link-small">Dribbble</a>
+              <a href="./index.html" class="menu-link menu-link-small">Email</a>
             </div>
           </div>
         </div>
@@ -156,6 +163,9 @@
     </div>
 
     <script src="./gsap/gsap.js"></script>
+    <script src="./gsap/ScrollTrigger.js"></script>
+    <script src="./gsap/SplitText.js"></script>
+    <script src="./gsap/TextPlugin.js"></script>
     <script src="https://unpkg.com/@barba/core"></script>
     <script src="./gsap_animation.js"></script>
     <script src="./transitions.js"></script>

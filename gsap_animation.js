@@ -1,6 +1,88 @@
 function initAppAnimations() {
+  initTextAnimations();
+  initTextPluginAnimation();
   initMenuHoverAnimations();
   initMenuToggleAnimation();
+}
+
+function initTextPluginAnimation() {
+  if (typeof gsap === "undefined" || typeof TextPlugin === "undefined") return;
+
+  if (typeof window.__textPluginCleanup === "function") {
+    window.__textPluginCleanup();
+    window.__textPluginCleanup = null;
+  }
+
+  const targets = Array.from(document.querySelectorAll(".textplugin-word"));
+  if (!targets.length) return;
+
+  gsap.registerPlugin(TextPlugin);
+  const words = ["GSAP", "Framer", "Figma", "Vibe coding"];
+  const timelines = [];
+
+  targets.forEach((target) => {
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 0.4 });
+
+    words.forEach((word) => {
+      tl.to(target, {
+        duration: 0.55,
+        text: word,
+        ease: "power2.out",
+      }).to({}, { duration: 1.1 });
+    });
+
+    timelines.push(tl);
+  });
+
+  window.__textPluginCleanup = () => {
+    timelines.forEach((tl) => tl.kill());
+  };
+}
+
+function initTextAnimations() {
+  if (typeof gsap === "undefined" || typeof SplitText === "undefined" || typeof ScrollTrigger === "undefined") return;
+
+  if (typeof window.__textSplitCleanup === "function") {
+    window.__textSplitCleanup();
+    window.__textSplitCleanup = null;
+  }
+
+  const targets = Array.from(document.querySelectorAll(".textanimation"));
+  if (!targets.length) return;
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.set(targets, { perspective: 300 });
+
+  const splits = [];
+  const tweens = [];
+  targets.forEach((target, index) => {
+    const split = new SplitText(target, { type: "chars, lines" });
+    splits.push(split);
+    const tween = gsap.from(split.chars, {
+      opacity: 0,
+      rotateY: 15,
+      rotateX: 80,
+      rotateZ: 20,
+      transformOrigin: "bottom bottom 10px",
+      stagger: 0.01,
+      duration: 0.4,
+      delay: index * 0.08,
+      ease: "power2.out",
+      clearProps: "transform,opacity",
+      scrollTrigger: {
+        trigger: target,
+        start: "top 50%",
+        toggleActions: "play none none none",
+        once: true,
+      },
+    });
+    tweens.push(tween);
+  });
+
+  window.__textSplitCleanup = () => {
+    tweens.forEach((tween) => tween.kill());
+    splits.forEach((split) => split.revert());
+  };
 }
 
 function initLoaderAnimation(onComplete) {
@@ -11,6 +93,10 @@ function initLoaderAnimation(onComplete) {
 
   const loader = document.querySelector("[data-loader]");
   if (!loader) {
+    if (typeof onComplete === "function") onComplete();
+    return;
+  }
+  if (loader.dataset.state === "hidden") {
     if (typeof onComplete === "function") onComplete();
     return;
   }
@@ -41,15 +127,25 @@ function initLoaderAnimation(onComplete) {
       duration: 0.28,
       delay: 0.18,
       ease: "power2.inOut",
-      onComplete: () => {
-        if (typeof onComplete === "function") onComplete();
-      },
-    });
-  } else {
-    tl.call(() => {
-      if (typeof onComplete === "function") onComplete();
     });
   }
+
+  tl.to(loader, {
+    autoAlpha: 0,
+    yPercent: -3,
+    duration: 0.42,
+    ease: "power2.inOut",
+    delay: 0.08,
+  });
+
+  tl.call(() => {
+    if (typeof window.removeLoader === "function") {
+      window.removeLoader({ immediate: true });
+    } else {
+      loader.style.display = "none";
+    }
+    if (typeof onComplete === "function") onComplete();
+  });
 }
 
 function initMenuHoverAnimations() {
@@ -109,12 +205,14 @@ function initMenuToggleAnimation() {
       backdrop.style.pointerEvents = "auto";
       menu.setAttribute("aria-hidden", "false");
       toggle.setAttribute("aria-expanded", "true");
+      document.body.classList.add("menu-open");
     },
     onReverseComplete: () => {
       menu.style.pointerEvents = "none";
       backdrop.style.pointerEvents = "none";
       menu.setAttribute("aria-hidden", "true");
       toggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("menu-open");
     },
   });
 
@@ -193,6 +291,20 @@ function initMenuToggleAnimation() {
     tl.timeScale(2).reverse();
   }
 
+  function closeMenuImmediately() {
+    tl.pause(0);
+    gsap.set(menu, { width: 0, pointerEvents: "none" });
+    gsap.set(backdrop, { autoAlpha: 0, pointerEvents: "none" });
+    gsap.set(links, { xPercent: 40, yPercent: 80, autoAlpha: 0 });
+    gsap.set(layers, { xPercent: 24 });
+    gsap.set(bars[0], { y: 0 });
+    gsap.set(bars[1], { autoAlpha: 1 });
+    gsap.set(bars[2], { y: 0 });
+    menu.setAttribute("aria-hidden", "true");
+    toggle.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("menu-open");
+  }
+
   const onToggleClick = () => {
     if (tl.progress() > 0 && !tl.reversed()) {
       closeMenu();
@@ -226,7 +338,10 @@ function initMenuToggleAnimation() {
   const onBackdropClick = () => closeMenu();
   backdrop.addEventListener("click", onBackdropClick);
 
+  window.__closeMenuImmediately = closeMenuImmediately;
+
   window.__menuToggleCleanup = () => {
+    closeMenuImmediately();
     toggle.removeEventListener("click", onToggleClick);
     linkHandlers.forEach(([link, handler]) => {
       link.removeEventListener("click", handler);
@@ -234,6 +349,9 @@ function initMenuToggleAnimation() {
     document.removeEventListener("click", onDocClick);
     document.removeEventListener("keydown", onDocKeydown);
     backdrop.removeEventListener("click", onBackdropClick);
+    if (window.__closeMenuImmediately === closeMenuImmediately) {
+      window.__closeMenuImmediately = null;
+    }
   };
 }
 

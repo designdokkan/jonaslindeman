@@ -14,6 +14,7 @@ function initBarbaTransitions(onAfterEnter) {
         // 3) reveal next page
         sync: false,
         leave(data) {
+          closeOpenMenuImmediately();
           const { overlay, cells } = getPixelTransitionOverlay();
           const order = pixelShuffle(cells);
           gsap.set(overlay, { autoAlpha: 1, display: "grid" });
@@ -103,10 +104,11 @@ function pixelShuffle(arr) {
 }
 
 function waitForContainerReady(container) {
+  if (!container) return Promise.resolve();
+
   return Promise.all([
     waitForCriticalHeroImage(container),
     waitForNextPaint(8),
-    waitMs(120),
   ]);
 }
 
@@ -151,18 +153,14 @@ function waitForNextPaint(frames = 1) {
   });
 }
 
-function waitMs(duration) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, duration);
-  });
-}
-
 function waitForCriticalHeroImage(container) {
+  if (!container) return Promise.resolve();
+
   const hero = container.querySelector(".hero-media");
   if (!hero) return Promise.resolve();
 
   hero.loading = "eager";
-  hero.decoding = "sync";
+  hero.decoding = "async";
   return waitForImageElement(hero).then(() => waitForNextPaint(2));
 }
 
@@ -175,7 +173,12 @@ function waitForImageElement(img) {
   }
 
   return new Promise((resolve) => {
+    const timeoutId = window.setTimeout(() => {
+      resolve();
+    }, 2000);
+
     const done = () => {
+      window.clearTimeout(timeoutId);
       img.removeEventListener("load", done);
       img.removeEventListener("error", done);
       if (typeof img.decode === "function") {
@@ -190,7 +193,36 @@ function waitForImageElement(img) {
 }
 
 function hideGlobalLoader() {
+  if (typeof window.removeLoader === "function") {
+    window.removeLoader({ immediate: true });
+    return;
+  }
   const loader = document.querySelector("[data-loader]");
   if (!loader) return;
   loader.style.display = "none";
+}
+
+function closeOpenMenuImmediately() {
+  if (typeof window.__closeMenuImmediately === "function") {
+    window.__closeMenuImmediately();
+    return;
+  }
+
+  const menu = document.querySelector(".site-menu");
+  const toggle = document.querySelector(".menu-toggle");
+  const backdrop = document.querySelector(".menu-backdrop");
+
+  if (menu) {
+    menu.style.width = "0";
+    menu.style.pointerEvents = "none";
+    menu.setAttribute("aria-hidden", "true");
+  }
+  if (toggle) {
+    toggle.setAttribute("aria-expanded", "false");
+  }
+  if (backdrop) {
+    backdrop.style.opacity = "0";
+    backdrop.style.pointerEvents = "none";
+  }
+  document.body.classList.remove("menu-open");
 }
