@@ -42,11 +42,13 @@ body.is-loaded {
 }
 
 .pixel-transition {
+  --transition-grid-cols: 16;
+  --transition-grid-rows: 9;
   position: fixed;
   inset: 0;
   z-index: 40000;
-  grid-template-columns: repeat(16, minmax(0, 1fr));
-  grid-template-rows: repeat(9, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--transition-grid-cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--transition-grid-rows), minmax(0, 1fr));
   pointer-events: none;
   display: none;
   opacity: 0;
@@ -423,5 +425,12 @@ main {
 @media (max-width: 900px) {
   .site-menu.is-open {
     width: 100vw;
+  }
+}
+
+@media (max-width: 767px) {
+  .pixel-transition {
+    --transition-grid-cols: 6;
+    --transition-grid-rows: 12;
   }
 }
