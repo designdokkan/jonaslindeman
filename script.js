@@ -14,8 +14,9 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function isIndexPage() {
-  const path = window.location.pathname;
-  return path.endsWith("/index.html") || path === "/" || path === "";
+  const path = window.location.pathname || "";
+  const lastSegment = path.split("/").filter(Boolean).pop() || "";
+  return lastSegment === "" || lastSegment === "index.html";
 }
 
 function runIndexLoaderFlow() {
