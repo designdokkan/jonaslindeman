@@ -2,15 +2,20 @@
   --white: oklch(0.975 0 0);
   --black: oklch(0.22 0 0);
   --red: oklch(0.62 0.24 25);
+  --green: oklch(0.7294 0.2565 150.35);
+  --selection-color: oklch(0.6382 0.2713 346.24);
   --dark-blue: oklch(0.28 0.08 260);
   --darker-blue: oklch(0.2 0.07 260);
   --section-pad: clamp(1rem, 1.6vw, 1.5rem);
   --menu-pad: clamp(1.2rem, 2vw, 1.8rem);
   --grid-gutter: clamp(0.5rem, 1vw, 1rem);
-  --l-text: clamp(2rem, 6vw, 5rem);
-  --m-text: clamp(1.5rem, 4.5vw, 4rem);
-  --s-text: clamp(1rem, 3.5vw, 3rem);
+  --textgap: clamp(1.8rem, 2.6vw, 4rem);
+  --static-vh: 1svh;
+  --l-text: clamp(4rem, 6vw, 6.5rem);
+  --m-text: clamp(2.5rem, 4.5vw, 5rem);
+  --s-text: clamp(1rem, 3.5vw, 2.5rem);
   --xs-text: clamp(0.7rem, 2vw, 1.5rem);
+  --geist-weight: 300;
 }
 
 *,
@@ -28,14 +33,27 @@ body {
   background-color: var(--white);
 }
 
+::selection {
+  background: var(--selection-color);
+  color: var(--white);
+}
+
+::-moz-selection {
+  background: var(--selection-color);
+  color: var(--white);
+}
+
 
 body {
   background: var(--white);
   font-family: "Geist", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 600;
+  font-weight: var(--geist-weight);
   line-height: 1.2em;
   letter-spacing: 0.04em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body.is-loaded {
@@ -84,7 +102,7 @@ body.is-loaded {
 }
 
 main {
-  min-height: 100dvh;
+  min-height: calc(var(--static-vh) * 100);
 }
 
 .site-wrapper {
@@ -108,8 +126,8 @@ main {
 }
 
 .hero {
-  height: min(100dvh, 980px);
-  min-height: 100svh;
+  height: min(calc(var(--static-vh) * 100), 980px);
+  min-height: calc(var(--static-vh) * 100);
   padding: var(--section-pad);
   position: relative;
 }
@@ -360,6 +378,74 @@ main {
   text-align: left;
 }
 
+.statement-block {
+  max-width: none;
+  justify-self: stretch;
+  text-align: center;
+}
+
+.statement-text {
+  width: 100%;
+}
+
+.about-text-section {
+  align-content: start;
+}
+
+.about-text-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2vw, 2.5rem);
+}
+
+.about-text-item {
+  display: grid;
+  align-content: start;
+  gap: var(--textgap);
+}
+
+.about-text-cta {
+  grid-column: 1 / -1;
+  margin-top: clamp(1rem, 2vw, 1.5rem);
+}
+
+.about-text-button {
+  appearance: none;
+  border: none;
+  background: var(--green);
+  color: var(--black);
+  border-radius: 0;
+  padding: 0.55rem 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  width: 42vw;
+  min-width: 12rem;
+  max-width: 60vw;
+  transition:
+    width 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.45s ease,
+    color 0.45s ease,
+    border-radius 0.45s ease;
+  will-change: width, background-color, color, border-radius;
+}
+
+.about-text-button:hover,
+.about-text-button:focus-visible {
+  background: var(--black);
+  color: var(--white);
+  width: 60vw;
+  border-radius: 0.5rem;
+}
+
+.about-text-button svg {
+  width: 1em;
+  height: 1em;
+}
+
 .text-center {
   text-align: center;
   justify-self: center;
@@ -367,28 +453,39 @@ main {
   margin-inline: auto;
 }
 
-.l-text {
+.l-text,
+.m-text,
+.s-text {
   margin: 0;
-  font-size: var(--l-text);
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: normal;
   line-height: 1em;
+  letter-spacing: -0.04em;
+}
+
+.l-text {
+  font-size: var(--l-text);
 }
 
 .m-text {
-  margin: 0;
   font-size: var(--m-text);
-  line-height: 1em;
 }
 
 .s-text {
-  margin: 0;
   font-size: var(--s-text);
-  line-height: 1em;
+  font-family: "Geist", sans-serif;
+  font-weight: var(--geist-weight);
+  letter-spacing: 0.04em;
 }
 
 .xs-text {
   margin: 0;
   font-size: var(--xs-text);
-    line-height: 1.2em;
+  font-family: "Geist", sans-serif;
+  font-weight: var(--geist-weight);
+  line-height: 1.2em;
+  letter-spacing: 0.04em;
 }
 
 .w-large {
@@ -466,6 +563,27 @@ main {
 @media (max-width: 900px) {
   .site-menu.is-open {
     width: 100vw;
+  }
+
+  .about-text-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .statement-section .statement-block {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 901px) {
+  .about-text-button {
+    width: 24vw;
+    min-width: 14rem;
+    max-width: 40vw;
+  }
+
+  .about-text-button:hover,
+  .about-text-button:focus-visible {
+    width: 40vw;
   }
 }
 

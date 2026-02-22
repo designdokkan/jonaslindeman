@@ -27,10 +27,28 @@ function runIndexLoaderFlow() {
 }
 
 function initPage() {
+  initStaticViewportHeight();
   removeLoader({ immediate: true });
   document.body.classList.add("is-loaded");
   initLogoLinkBehavior();
+  initLucideIcons();
   initAppAnimations();
+}
+
+function initStaticViewportHeight() {
+  const setVh = () => {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--static-vh", `${vh}px`);
+  };
+
+  setVh();
+  if (window.__staticVhBound) return;
+  window.__staticVhBound = true;
+
+  window.addEventListener("pageshow", setVh);
+  window.addEventListener("orientationchange", () => {
+    window.setTimeout(setVh, 120);
+  });
 }
 
 function initLogoLinkBehavior() {
@@ -91,6 +109,11 @@ function finalizeLoaderState(loader) {
   loader.style.visibility = "hidden";
   loader.style.pointerEvents = "none";
   loader.setAttribute("aria-hidden", "true");
+}
+
+function initLucideIcons() {
+  if (typeof window.lucide === "undefined" || typeof window.lucide.createIcons !== "function") return;
+  window.lucide.createIcons();
 }
 
 window.removeLoader = removeLoader;
