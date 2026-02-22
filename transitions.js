@@ -61,15 +61,36 @@ function getPixelTransitionOverlay() {
   if (!overlay) {
     overlay = document.createElement("div");
     overlay.className = "pixel-transition";
-    for (let i = 0; i < 16 * 9; i += 1) {
+    document.body.appendChild(overlay);
+  }
+  syncPixelCellCount(overlay);
+  const cells = Array.from(overlay.querySelectorAll(".pixel-cell"));
+  return { overlay, cells };
+}
+
+function syncPixelCellCount(overlay) {
+  if (!overlay) return;
+  const styles = getComputedStyle(overlay);
+  const cols = Number.parseInt(styles.getPropertyValue("--transition-grid-cols"), 10) || 16;
+  const rows = Number.parseInt(styles.getPropertyValue("--transition-grid-rows"), 10) || 9;
+  const targetCount = cols * rows;
+  const currentCells = overlay.querySelectorAll(".pixel-cell");
+
+  if (currentCells.length < targetCount) {
+    const missing = targetCount - currentCells.length;
+    for (let i = 0; i < missing; i += 1) {
       const cell = document.createElement("span");
       cell.className = "pixel-cell";
       overlay.appendChild(cell);
     }
-    document.body.appendChild(overlay);
+    return;
   }
-  const cells = Array.from(overlay.querySelectorAll(".pixel-cell"));
-  return { overlay, cells };
+
+  if (currentCells.length > targetCount) {
+    for (let i = currentCells.length - 1; i >= targetCount; i -= 1) {
+      currentCells[i].remove();
+    }
+  }
 }
 
 function pixelShuffle(arr) {
