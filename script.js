@@ -1,38 +1,41 @@
 window.addEventListener("DOMContentLoaded", () => {
-  const onIndexPage = isIndexPage();
+  const initialNamespace = getCurrentNamespace();
 
   if (typeof initBarbaTransitions === "function") {
-    initBarbaTransitions(() => {
-      initPage();
+    initBarbaTransitions({
+      onViewEnter: (data) => {
+        const namespace = data?.next?.namespace || getCurrentNamespace();
+        initPage(namespace);
+      },
     });
   }
 
-  if (onIndexPage) {
+  if (initialNamespace === "main") {
     runIndexLoaderFlow();
     return;
   }
 
-  initPage();
+  initPage(initialNamespace);
 });
 
-function isIndexPage() {
-  const path = window.location.pathname || "";
-  return path.endsWith("/") || path.endsWith("/index.html");
+function getCurrentNamespace() {
+  const container = document.querySelector('[data-barba="container"]');
+  return container?.dataset?.barbaNamespace || null;
 }
 
 function runIndexLoaderFlow() {
   initLoaderAnimation(() => {
-    initPage();
+    initPage("main");
   });
 }
 
-function initPage() {
+function initPage(namespace) {
   initStaticViewportHeight();
   removeLoader({ immediate: true });
   document.body.classList.add("is-loaded");
   initLogoLinkBehavior();
   initLucideIcons();
-  initAppAnimations();
+  initAppAnimations(namespace);
 }
 
 function initStaticViewportHeight() {

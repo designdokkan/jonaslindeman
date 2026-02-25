@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>jonas _][_ lindeman</title>
+    <meta property="og:image" content="./Assets/Images/Favicon/S-preview.jpg" />
+    <meta name="twitter:image" content="./Assets/Images/Favicon/S-preview.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/jpeg" href="./Assets/Images/Favicon/Favicon.jpg" />
     <link rel="preload" as="image" href="./Assets/Images/hero.jpg" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,6 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Instrument+Serif:ital@0;1&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./utilities.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body data-barba="wrapper">
@@ -37,7 +42,7 @@
       -->
       <main>
         <div class="site-wrapper">
-          <section class="hero" id="hero-start">
+          <section class="hero section-pad" id="hero-start">
             <nav class="hero-nav" aria-label="Primary">
               <a class="hero-logo-link" href="./index.html" aria-label="Go to home">
                 <svg
@@ -81,7 +86,7 @@
             </div>
           </section>
 
-          <section class="content-section section-center statement-section">
+          <section class="content-section section-center statement-section section-pad">
             <div class="statement-block w-large">
               <p class="m-text statement-text">
                   Hi! My name is Jonas _][_ Lindeman and I'm a Digital Designer at
@@ -92,12 +97,12 @@
                   rel="noopener noreferrer"
                 >
                   EBB Scandinavia
-                </a>
+                </a> and I focus alot on new technology and how to use it
               </p>
             </div>
           </section>
 
-          <section class="image-section" aria-label="Image grid">
+          <section class="image-section section-pad" aria-label="Image grid">
             <div class="image-grid-wrap">
               <div class="image-row row-3">
                 <img
@@ -167,7 +172,7 @@
     <script src="./gsap/ScrollTrigger.js"></script>
     <script src="./gsap/SplitText.js"></script>
     <script src="./gsap/TextPlugin.js"></script>
-    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="https://unpkg.com/@barba/core@2.10.3/dist/barba.umd.js"></script>
     <script src="./gsap_animation.js"></script>
     <script src="./transitions.js"></script>
     <script src="./script.js"></script>

@@ -1,10 +1,24 @@
-function initBarbaTransitions(onAfterEnter) {
+function initBarbaTransitions(options = {}) {
   if (typeof barba === "undefined" || typeof gsap === "undefined") return;
   if (window.__barbaInitialized) return;
   window.__barbaInitialized = true;
+  const { onViewEnter } = options;
+
+  setManualScrollRestoration();
+  registerGlobalBarbaHooks();
 
   barba.init({
     preventRunning: true,
+    timeout: 7000,
+    requestError(trigger, action, url) {
+      if (!url) {
+        window.location.reload();
+        return false;
+      }
+      window.location.href = url;
+      return false;
+    },
+    views: createViews(onViewEnter),
     transitions: [
       {
         name: "pixel-grid",
@@ -15,14 +29,13 @@ function initBarbaTransitions(onAfterEnter) {
         sync: false,
         leave(data) {
           closeOpenMenuImmediately();
-          const { overlay, cells } = getPixelTransitionOverlay();
-          const order = pixelShuffle(cells);
+          const { overlay, cells, cols, rows } = getPixelTransitionOverlay();
           gsap.set(overlay, { autoAlpha: 1, display: "grid" });
           gsap.set(cells, { autoAlpha: 0 });
-          return gsap.to(order, {
+          return gsap.to(cells, {
             autoAlpha: 1,
             duration: 0.1,
-            stagger: 0.004,
+            stagger: getPixelStagger(cols, rows),
             ease: "none",
           });
         },
@@ -38,17 +51,15 @@ function initBarbaTransitions(onAfterEnter) {
         },
 
         enter(data) {
-          const { overlay, cells } = getPixelTransitionOverlay();
-          const order = pixelShuffle(cells);
-          return gsap.to(order, {
+          const { overlay, cells, cols, rows } = getPixelTransitionOverlay();
+          return gsap.to(cells, {
             autoAlpha: 0,
             duration: 0.1,
-            stagger: 0.004,
+            stagger: getPixelStagger(cols, rows),
             ease: "none",
             onComplete: () => {
               gsap.set(overlay, { autoAlpha: 0, display: "none" });
               cleanupContainerStyles(data.next.container);
-              if (typeof onAfterEnter === "function") onAfterEnter(data);
             },
           });
         },
@@ -64,16 +75,14 @@ function getPixelTransitionOverlay() {
     overlay.className = "pixel-transition";
     document.body.appendChild(overlay);
   }
-  syncPixelCellCount(overlay);
+  const { cols, rows } = getPixelGridDimensions(overlay);
+  syncPixelCellCount(overlay, cols, rows);
   const cells = Array.from(overlay.querySelectorAll(".pixel-cell"));
-  return { overlay, cells };
+  return { overlay, cells, cols, rows };
 }
 
-function syncPixelCellCount(overlay) {
+function syncPixelCellCount(overlay, cols, rows) {
   if (!overlay) return;
-  const styles = getComputedStyle(overlay);
-  const cols = Number.parseInt(styles.getPropertyValue("--transition-grid-cols"), 10) || 16;
-  const rows = Number.parseInt(styles.getPropertyValue("--transition-grid-rows"), 10) || 9;
   const targetCount = cols * rows;
   const currentCells = overlay.querySelectorAll(".pixel-cell");
 
@@ -94,13 +103,23 @@ function syncPixelCellCount(overlay) {
   }
 }
 
-function pixelShuffle(arr) {
-  const copy = arr.slice();
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
+function getPixelGridDimensions(overlay) {
+  const styles = getComputedStyle(overlay);
+  const cols = Number.parseInt(styles.getPropertyValue("--transition-grid-cols"), 10) || 16;
+  const rows = Number.parseInt(styles.getPropertyValue("--transition-grid-rows"), 10) || 9;
+  return { cols, rows };
+}
+
+function getPixelStagger(cols, rows) {
+  const each = 0.004;
+  const amount = Math.max((cols * rows - 1) * each, 0);
+  return gsap.utils.distribute({
+    base: 0,
+    amount,
+    grid: [rows, cols],
+    from: "end",
+    ease: "none",
+  });
 }
 
 function waitForContainerReady(container) {
@@ -225,4 +244,32 @@ function closeOpenMenuImmediately() {
     backdrop.style.pointerEvents = "none";
   }
   document.body.classList.remove("menu-open");
+}
+
+function setManualScrollRestoration() {
+  if (!("scrollRestoration" in window.history)) return;
+  window.history.scrollRestoration = "manual";
+}
+
+function forceScrollToTop() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+function registerGlobalBarbaHooks() {
+  barba.hooks.beforeEnter(() => {
+    forceScrollToTop();
+  });
+}
+
+function createViews(onViewEnter) {
+  const namespaces = ["main", "about"];
+
+  return namespaces.map((namespace) => ({
+    namespace,
+    afterEnter(data) {
+      if (typeof onViewEnter === "function") onViewEnter(data);
+    },
+  }));
 }

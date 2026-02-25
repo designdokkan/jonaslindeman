@@ -1,0 +1,277 @@
+:root {
+  /* Core color scale */
+  --color-white: oklch(0.975 0 0);
+  --color-black: oklch(0.22 0 0);
+  --color-red: oklch(0.62 0.24 25);
+  --color-green: oklch(0.7294 0.2565 150.35);
+  --color-dark-blue: oklch(0.28 0.08 260);
+  --color-darker-blue: oklch(0.2 0.07 260);
+  --color-selection: oklch(0.6382 0.2713 346.24);
+
+  /* Semantic color tokens */
+  --c-background: var(--color-white);
+  --c-body: var(--color-black);
+  --c-accent: var(--color-red);
+  --c-success: var(--color-green);
+  --c-panel: var(--color-dark-blue);
+  --c-panel-deep: var(--color-darker-blue);
+
+  /* Core fluid spacing scale */
+  --space-xs: clamp(0.4rem, 0.32rem + 0.3vw, 0.65rem);
+  --space-s: clamp(0.65rem, 0.5rem + 0.5vw, 1rem);
+  --space-m: clamp(1rem, 0.8rem + 0.9vw, 1.5rem);
+  --space-l: clamp(1.5rem, 1.2rem + 1.4vw, 2.4rem);
+  --space-xl: clamp(2rem, 1.6rem + 2vw, 3.2rem);
+  --space-2xl: clamp(2.8rem, 2.2rem + 3vw, 4.8rem);
+  --space-3xl: clamp(3.8rem, 3rem + 4vw, 6.4rem);
+  --space-4xl: clamp(5rem, 4rem + 5vw, 8rem);
+  --space-5xl: clamp(6.5rem, 5.2rem + 6.5vw, 10.5rem);
+
+  /* Core fluid type scale */
+  --fontSize-xs: clamp(0.7rem, 0.66rem + 0.2vw, 0.95rem);
+  --fontSize-s: clamp(1rem, 0.9rem + 0.5vw, 2.5rem);
+  --fontSize-m: clamp(2.5rem, 2rem + 1.8vw, 5rem);
+  --fontSize-l: clamp(4rem, 3.4rem + 2.6vw, 6.5rem);
+  --fontSize-xl: clamp(4.8rem, 4rem + 3.3vw, 8rem);
+
+  /* Line-height scale (unitless) */
+  --lineHeight-xs: 1.2;
+  --lineHeight-s: 1.1;
+  --lineHeight-m: 1;
+  --lineHeight-l: 1;
+  --lineHeight-xl: 0.95;
+
+  /* Font weights */
+  --fontWeight-230: 230;
+  --fontWeight-300: 300;
+  --fontWeight-400: 400;
+  --fontWeight-700: 700;
+
+  /* System tokens currently used by styles.css (backward compatible aliases) */
+  --white: var(--color-white);
+  --black: var(--color-black);
+  --red: var(--color-red);
+  --green: var(--color-green);
+  --selection-color: var(--color-selection);
+  --dark-blue: var(--color-dark-blue);
+  --darker-blue: var(--color-darker-blue);
+
+  --section-pad: var(--space-m);
+  --menu-pad: clamp(1.2rem, 1rem + 1vw, 1.8rem);
+  --grid-gutter: var(--space-s);
+  --textgap: var(--space-2xl);
+
+  --static-vh: 1svh;
+
+  --l-text: var(--fontSize-l);
+  --m-text: var(--fontSize-m);
+  --s-text: var(--fontSize-s);
+  --xs-text: var(--fontSize-xs);
+  --geist-weight: var(--fontWeight-300);
+
+  /* Frame spacing utilities */
+  --spaceframe-s: var(--space-s);
+  --spaceframe-m: var(--space-m);
+  --spaceframe-l: var(--space-l);
+  --spaceframe-xl: var(--space-xl);
+
+  /* Font families */
+  --font-family-sans: "Geist", sans-serif;
+  --font-family-serif: "Instrument Serif", serif;
+
+  /* Type rhythm */
+  --line-height-body: 1.2;
+  --line-height-display: 1;
+  --line-height-menu-big: 1.05;
+  --line-height-menu-small: 1.15;
+  --letter-spacing-body: 0.04em;
+  --letter-spacing-display: -0.04em;
+
+  /* Layer scale */
+  --z-menu-underlay: 1250;
+  --z-menu: 1300;
+  --z-menu-content: 5;
+  --z-nav: 1500;
+  --z-loader: 30000;
+  --z-transition: 40000;
+
+  /* Layout and grid tokens */
+  --layout-grid-columns: 12;
+  --layout-wrapper-gap: clamp(5rem, 10vw, 15rem);
+  --layout-hero-max-height: 980px;
+  --layout-main-min-height: 100dvh;
+  --layout-hero-min-height: 100svh;
+  --layout-content-max-width: 100%;
+  --overlay-accent-opacity: 18%;
+
+  /* Component size tokens */
+  --nav-min-height: 44px;
+  --logo-height: 30px;
+  --menu-toggle-size: 32px;
+  --menu-toggle-bar-width: 24px;
+  --menu-toggle-bar-height: 2px;
+  --menu-toggle-gap: 5px;
+  --hero-title-inline-pad: 4rem;
+  --textplugin-min-width: 6ch;
+  --menu-open-width: 30vw;
+  --menu-open-width-mobile: 100vw;
+  --menu-nav-gap: clamp(0.4rem, 0.8vw, 0.75rem);
+  --menu-subnav-gap: clamp(0.3rem, 0.7vw, 0.6rem);
+  --menu-link-big-size: clamp(3rem, 3.2vw, 3rem);
+  --menu-link-small-size: clamp(2rem, 2.2vw, 2.5rem);
+  --menu-char-shadow-offset: 1em;
+  --about-grid-gap: clamp(1.25rem, 2vw, 2.5rem);
+  --about-cta-margin-top: clamp(1rem, 2vw, 1.5rem);
+
+  /* Button tokens */
+  --button-pad-block: 0.55rem;
+  --button-pad-inline: 0.95rem;
+  --button-gap: 0.45rem;
+  --button-width-mobile: 42vw;
+  --button-width-hover-mobile: 60vw;
+  --button-width-desktop: 24vw;
+  --button-width-hover-desktop: 40vw;
+  --button-min-width-mobile: 12rem;
+  --button-min-width-desktop: 14rem;
+  --button-max-width-mobile: 60vw;
+  --button-max-width-desktop: 40vw;
+  --icon-size: 1em;
+
+  /* Radius */
+  --radius-none: 0;
+  --radius-media: 0.8rem;
+  --radius-button-hover: 0.5rem;
+
+  /* Motion */
+  --ease-standard: ease;
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 0.3s;
+  --duration-mid: 0.45s;
+  --duration-slow: 0.6s;
+  --duration-expand: 0.75s;
+
+  /* Pixel transition grid */
+  --pixel-grid-cols: 16;
+  --pixel-grid-rows: 9;
+  --pixel-grid-cols-mobile: 6;
+  --pixel-grid-rows-mobile: 12;
+
+  /* Grid row presets */
+  --row-columns-single: 1;
+  --row-columns-double: 2;
+  --row-columns-triple: 3;
+
+  /* Media/logo constraints */
+  --loader-logo-width: min(80vw, 560px);
+  --loader-logo-max-height: min(42svh, 360px);
+
+  /* Grid spans */
+  --span-large: 8;
+  --span-medium: 6;
+  --span-small: 3;
+  --center-start-large: 3;
+  --center-start-medium: 4;
+  --center-start-small: 5;
+}
+
+/* Dimension utilities */
+.width-s { width: var(--space-s); }
+.width-m { width: var(--space-m); }
+.width-l { width: var(--space-l); }
+.width-xl { width: var(--space-xl); }
+.width-2xl { width: var(--space-2xl); }
+.width-3xl { width: var(--space-3xl); }
+.width-4xl { width: var(--space-4xl); }
+.width-5xl { width: var(--space-5xl); }
+
+.minWidth-s { min-width: var(--space-s); }
+.minWidth-m { min-width: var(--space-m); }
+.minWidth-l { min-width: var(--space-l); }
+.minWidth-xl { min-width: var(--space-xl); }
+.minWidth-2xl { min-width: var(--space-2xl); }
+.minWidth-3xl { min-width: var(--space-3xl); }
+.minWidth-4xl { min-width: var(--space-4xl); }
+.minWidth-5xl { min-width: var(--space-5xl); }
+
+.maxWidth-s { max-width: var(--space-s); }
+.maxWidth-m { max-width: var(--space-m); }
+.maxWidth-l { max-width: var(--space-l); }
+.maxWidth-xl { max-width: var(--space-xl); }
+.maxWidth-2xl { max-width: var(--space-2xl); }
+.maxWidth-3xl { max-width: var(--space-3xl); }
+.maxWidth-4xl { max-width: var(--space-4xl); }
+.maxWidth-5xl { max-width: var(--space-5xl); }
+
+.height-s { height: var(--space-s); }
+.height-m { height: var(--space-m); }
+.height-l { height: var(--space-l); }
+.height-xl { height: var(--space-xl); }
+.height-2xl { height: var(--space-2xl); }
+.height-3xl { height: var(--space-3xl); }
+.height-4xl { height: var(--space-4xl); }
+.height-5xl { height: var(--space-5xl); }
+
+.minHeight-s { min-height: var(--space-s); }
+.minHeight-m { min-height: var(--space-m); }
+.minHeight-l { min-height: var(--space-l); }
+.minHeight-xl { min-height: var(--space-xl); }
+.minHeight-2xl { min-height: var(--space-2xl); }
+.minHeight-3xl { min-height: var(--space-3xl); }
+.minHeight-4xl { min-height: var(--space-4xl); }
+.minHeight-5xl { min-height: var(--space-5xl); }
+
+.maxHeight-s { max-height: var(--space-s); }
+.maxHeight-m { max-height: var(--space-m); }
+.maxHeight-l { max-height: var(--space-l); }
+.maxHeight-xl { max-height: var(--space-xl); }
+.maxHeight-2xl { max-height: var(--space-2xl); }
+.maxHeight-3xl { max-height: var(--space-3xl); }
+.maxHeight-4xl { max-height: var(--space-4xl); }
+.maxHeight-5xl { max-height: var(--space-5xl); }
+
+/* Spacing utilities */
+.spacerRight-s { margin-right: var(--space-s); }
+.spacerRight-m { margin-right: var(--space-m); }
+.spacerRight-l { margin-right: var(--space-l); }
+.spacerRight-xl { margin-right: var(--space-xl); }
+
+.spacerLeft-s { margin-left: var(--space-s); }
+.spacerLeft-m { margin-left: var(--space-m); }
+.spacerLeft-l { margin-left: var(--space-l); }
+.spacerLeft-xl { margin-left: var(--space-xl); }
+
+.spacerTop-s { margin-top: var(--space-s); }
+.spacerTop-m { margin-top: var(--space-m); }
+.spacerTop-l { margin-top: var(--space-l); }
+.spacerTop-xl { margin-top: var(--space-xl); }
+
+.spacerBottom-s { margin-bottom: var(--space-s); }
+.spacerBottom-m { margin-bottom: var(--space-m); }
+.spacerBottom-l { margin-bottom: var(--space-l); }
+.spacerBottom-xl { margin-bottom: var(--space-xl); }
+
+.spaceframe-s { padding: var(--spaceframe-s); }
+.spaceframe-m { padding: var(--spaceframe-m); }
+.spaceframe-l { padding: var(--spaceframe-l); }
+.spaceframe-xl { padding: var(--spaceframe-xl); }
+
+/* Type utilities */
+.textSize-xs { font-size: var(--fontSize-xs); line-height: var(--lineHeight-xs); }
+.textSize-s { font-size: var(--fontSize-s); line-height: var(--lineHeight-s); }
+.textSize-m { font-size: var(--fontSize-m); line-height: var(--lineHeight-m); }
+.textSize-l { font-size: var(--fontSize-l); line-height: var(--lineHeight-l); }
+.textSize-xl { font-size: var(--fontSize-xl); line-height: var(--lineHeight-xl); }
+
+.fontWeight-400 { font-weight: var(--fontWeight-400); }
+.fontWeight-700 { font-weight: var(--fontWeight-700); }
+
+/* Color utilities */
+.c-body { color: var(--c-body); }
+.c-background { color: var(--c-background); }
+.c-accent { color: var(--c-accent); }
+.c-success { color: var(--c-success); }
+
+.bg-body { background-color: var(--c-body); }
+.bg-background { background-color: var(--c-background); }
+.bg-accent { background-color: var(--c-accent); }
+.bg-success { background-color: var(--c-success); }
