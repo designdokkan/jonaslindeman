@@ -1,3 +1,16 @@
+function getMotionEase() {
+  if (typeof gsap === "undefined") return "power3.out";
+  if (typeof CustomEase !== "undefined") {
+    gsap.registerPlugin(CustomEase);
+    if (!window.__customEaseReady) {
+      CustomEase.create("custom", "M0,0 C0.9,0.2 0.1,1 1,1 ");
+      window.__customEaseReady = true;
+    }
+    return "custom";
+  }
+  return "power3.out";
+}
+
 function initBarbaTransitions(options = {}) {
   if (typeof barba === "undefined" || typeof gsap === "undefined") return;
   if (window.__barbaInitialized) return;
@@ -21,7 +34,7 @@ function initBarbaTransitions(options = {}) {
     views: createViews(onViewEnter),
     transitions: [
       {
-        name: "pixel-grid",
+        name: "split-rows",
         // Sequential flow:
         // 1) cover current page fully
         // 2) wait for next container in `enter`
@@ -29,15 +42,15 @@ function initBarbaTransitions(options = {}) {
         sync: false,
         leave(data) {
           closeOpenMenuImmediately();
-          const { overlay, cells, cols, rows } = getPixelTransitionOverlay();
+          const { overlay, leftPanels, rightPanels } = getSplitTransitionOverlay();
           gsap.set(overlay, { autoAlpha: 1, display: "grid" });
-          gsap.set(cells, { autoAlpha: 0 });
-          return gsap.to(cells, {
-            autoAlpha: 1,
-            duration: 0.1,
-            stagger: getPixelStagger(cols, rows),
-            ease: "none",
-          });
+          gsap.set(leftPanels, { xPercent: -101 });
+          gsap.set(rightPanels, { xPercent: 101 });
+
+          return gsap
+            .timeline({ defaults: { duration: 0.42, ease: getMotionEase() } })
+            .to(leftPanels, { xPercent: 0, stagger: 0.04 }, 0)
+            .to(rightPanels, { xPercent: 0, stagger: 0.04 }, 0);
         },
         afterLeave(data) {
           // According to Barba lifecycle, next container is DOM-ready here.
@@ -51,75 +64,61 @@ function initBarbaTransitions(options = {}) {
         },
 
         enter(data) {
-          const { overlay, cells, cols, rows } = getPixelTransitionOverlay();
-          return gsap.to(cells, {
-            autoAlpha: 0,
-            duration: 0.1,
-            stagger: getPixelStagger(cols, rows),
-            ease: "none",
-            onComplete: () => {
-              gsap.set(overlay, { autoAlpha: 0, display: "none" });
-              cleanupContainerStyles(data.next.container);
-            },
-          });
+          const { overlay, leftPanels, rightPanels } = getSplitTransitionOverlay();
+          return gsap
+            .timeline({
+              defaults: { duration: 0.42, ease: getMotionEase() },
+              onComplete: () => {
+                gsap.set(overlay, { autoAlpha: 0, display: "none" });
+                cleanupContainerStyles(data.next.container);
+              },
+            })
+            .to(leftPanels, { xPercent: -101, stagger: { each: 0.035, from: "end" } }, 0)
+            .to(rightPanels, { xPercent: 101, stagger: { each: 0.035, from: "end" } }, 0);
         },
       },
     ],
   });
 }
 
-function getPixelTransitionOverlay() {
-  let overlay = document.querySelector(".pixel-transition");
+function getSplitTransitionOverlay() {
+  let overlay = document.querySelector(".split-transition");
   if (!overlay) {
     overlay = document.createElement("div");
-    overlay.className = "pixel-transition";
+    overlay.className = "split-transition";
     document.body.appendChild(overlay);
   }
-  const { cols, rows } = getPixelGridDimensions(overlay);
-  syncPixelCellCount(overlay, cols, rows);
-  const cells = Array.from(overlay.querySelectorAll(".pixel-cell"));
-  return { overlay, cells, cols, rows };
+  syncSplitRows(overlay);
+  const leftPanels = Array.from(overlay.querySelectorAll(".split-panel-left"));
+  const rightPanels = Array.from(overlay.querySelectorAll(".split-panel-right"));
+  return { overlay, leftPanels, rightPanels };
 }
 
-function syncPixelCellCount(overlay, cols, rows) {
+function syncSplitRows(overlay) {
   if (!overlay) return;
-  const targetCount = cols * rows;
-  const currentCells = overlay.querySelectorAll(".pixel-cell");
 
-  if (currentCells.length < targetCount) {
-    const missing = targetCount - currentCells.length;
-    for (let i = 0; i < missing; i += 1) {
-      const cell = document.createElement("span");
-      cell.className = "pixel-cell";
-      overlay.appendChild(cell);
-    }
-    return;
+  const meets = [40, 50, 20, 65, 35, 55, 28];
+  const currentRows = overlay.querySelectorAll(".split-row");
+
+  if (currentRows.length !== meets.length) {
+    overlay.innerHTML = "";
+    meets.forEach((meet) => {
+      const row = document.createElement("div");
+      row.className = "split-row";
+
+      const left = document.createElement("span");
+      left.className = "split-panel split-panel-left";
+      left.style.width = `${meet}vw`;
+
+      const right = document.createElement("span");
+      right.className = "split-panel split-panel-right";
+      right.style.width = `${100 - meet}vw`;
+
+      row.appendChild(left);
+      row.appendChild(right);
+      overlay.appendChild(row);
+    });
   }
-
-  if (currentCells.length > targetCount) {
-    for (let i = currentCells.length - 1; i >= targetCount; i -= 1) {
-      currentCells[i].remove();
-    }
-  }
-}
-
-function getPixelGridDimensions(overlay) {
-  const styles = getComputedStyle(overlay);
-  const cols = Number.parseInt(styles.getPropertyValue("--transition-grid-cols"), 10) || 16;
-  const rows = Number.parseInt(styles.getPropertyValue("--transition-grid-rows"), 10) || 9;
-  return { cols, rows };
-}
-
-function getPixelStagger(cols, rows) {
-  const each = 0.004;
-  const amount = Math.max((cols * rows - 1) * each, 0);
-  return gsap.utils.distribute({
-    base: 0,
-    amount,
-    grid: [rows, cols],
-    from: "end",
-    ease: "none",
-  });
 }
 
 function waitForContainerReady(container) {
@@ -175,7 +174,7 @@ function waitForNextPaint(frames = 1) {
 function waitForCriticalHeroImage(container) {
   if (!container) return Promise.resolve();
 
-  const hero = container.querySelector(".hero-media");
+  const hero = container.querySelector(".hero .media-cover");
   if (!hero) return Promise.resolve();
 
   hero.loading = "eager";
@@ -264,7 +263,7 @@ function registerGlobalBarbaHooks() {
 }
 
 function createViews(onViewEnter) {
-  const namespaces = ["main", "about"];
+  const namespaces = ["main", "about", "work"];
 
   return namespaces.map((namespace) => ({
     namespace,

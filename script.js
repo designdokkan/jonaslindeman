@@ -1,16 +1,40 @@
+function getMotionEase() {
+  if (typeof gsap === "undefined") return "power3.out";
+  if (typeof CustomEase !== "undefined") {
+    gsap.registerPlugin(CustomEase);
+    if (!window.__customEaseReady) {
+      CustomEase.create("custom", "M0,0 C0.9,0.2 0.1,1 1,1 ");
+      window.__customEaseReady = true;
+    }
+    return "custom";
+  }
+  return "power3.out";
+}
+
+window.__restoredFromBFCache = false;
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) window.__restoredFromBFCache = true;
+});
+
 window.addEventListener("DOMContentLoaded", () => {
   const initialNamespace = getCurrentNamespace();
+  const shouldRunInitialLoader = shouldPlayMainLoader(initialNamespace);
+  let skipInitialMainViewEnter = shouldRunInitialLoader;
 
   if (typeof initBarbaTransitions === "function") {
     initBarbaTransitions({
       onViewEnter: (data) => {
         const namespace = data?.next?.namespace || getCurrentNamespace();
+        if (skipInitialMainViewEnter && namespace === "main") {
+          skipInitialMainViewEnter = false;
+          return;
+        }
         initPage(namespace);
       },
     });
   }
 
-  if (initialNamespace === "main") {
+  if (shouldRunInitialLoader) {
     runIndexLoaderFlow();
     return;
   }
@@ -21,6 +45,24 @@ window.addEventListener("DOMContentLoaded", () => {
 function getCurrentNamespace() {
   const container = document.querySelector('[data-barba="container"]');
   return container?.dataset?.barbaNamespace || null;
+}
+
+function shouldPlayMainLoader(namespace) {
+  if (namespace !== "main") return false;
+  if (window.__restoredFromBFCache) return false;
+
+  const navEntry = performance.getEntriesByType("navigation")[0];
+  const navType = navEntry?.type || "navigate";
+  if (navType === "back_forward") return false;
+
+  try {
+    if (sessionStorage.getItem("main_loader_played") === "1") return false;
+    sessionStorage.setItem("main_loader_played", "1");
+  } catch (error) {
+    // Ignore storage failures and continue with current navigation checks.
+  }
+
+  return true;
 }
 
 function runIndexLoaderFlow() {
@@ -100,7 +142,7 @@ function removeLoader(options = {}) {
   gsap.to(loader, {
     autoAlpha: 0,
     duration: 0.32,
-    ease: "power2.out",
+    ease: getMotionEase(),
     onComplete: () => finalizeLoaderState(loader),
   });
 }

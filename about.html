@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Portfolio About</title>
-    <meta property="og:image" content="./Assets/Images/Favicon/S-preview.jpg" />
-    <meta name="twitter:image" content="./Assets/Images/Favicon/S-preview.jpg" />
+    <meta property="og:image" content="./Assets/Images/socials/S-preview.jpg" />
+    <meta name="twitter:image" content="./Assets/Images/socials/S-preview.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/jpeg" href="./Assets/Images/Favicon/Favicon.jpg" />
+    <link rel="icon" type="image/jpeg" href="./Assets/Images/socials/Favicon.jpg" />
     <link rel="preload" as="image" href="./Assets/Images/about1.avif" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,15 +20,9 @@
   </head>
   <body data-barba="wrapper">
     <div data-barba="container" data-barba-namespace="about">
-      <!--
-      <div class="grid-overlay" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
-      -->
       <main>
         <div class="site-wrapper">
-          <section class="hero section-pad" id="hero-start">
+          <section class="hero section" id="hero-start">
             <nav class="hero-nav" aria-label="Primary">
               <a class="hero-logo-link" href="./index.html" aria-label="Go to home">
                 <svg
@@ -61,10 +55,12 @@
               </button>
             </nav>
 
-            <div class="hero-media-wrap">
+            <div class="media-frame">
               <img
-                class="hero-media"
+                class="media-cover"
                 src="./Assets/Images/about1.avif"
+                width="2500"
+                height="1668"
                 loading="eager"
                 fetchpriority="high"
                 alt="Portfolio hero image"
@@ -75,7 +71,7 @@
             </h1>
           </section>
 
-          <section class="content-section about-text-section section-pad" aria-label="About details">
+          <section class="content-section about-text-section section" aria-label="About details">
             <div class="about-text-grid grid-span-full">
               <article class="about-text-item">
                 <h2 class="m-text">Design with intent</h2>
@@ -114,14 +110,14 @@
 
           <div class="menu-content">
             <nav class="menu-nav" aria-label="Menu">
-              <a href="./index.html#hero-start" class="menu-link menu-link-big">Work</a>
+              <a href="./work.html" class="menu-link menu-link-big">Work</a>
               <a href="./about.html#hero-start" class="menu-link menu-link-big">About</a>
               <a href="./index.html#hero-start" class="menu-link menu-link-big">Services</a>
               <a href="./index.html#hero-start" class="menu-link menu-link-big">Contact</a>
             </nav>
 
             <div class="menu-subnav">
-              <a href="./index.html#hero-start" class="menu-link menu-link-small">Instagram</a>
+              <a href="https://www.instagram.com/design.dokkan" class="menu-link menu-link-small" target="_blank" rel="noopener noreferrer">Instagram</a>
               <a href="./index.html#hero-start" class="menu-link menu-link-small">LinkedIn</a>
               <a href="./index.html#hero-start" class="menu-link menu-link-small">Dribbble</a>
               <a href="./index.html#hero-start" class="menu-link menu-link-small">Email</a>
@@ -134,6 +130,8 @@
     <script src="https://unpkg.com/lucide/dist/umd/lucide.js"></script>
     <script src="./gsap/gsap.js"></script>
     <script src="./gsap/ScrollTrigger.js"></script>
+    <script src="./gsap/CustomEase.js"></script>
+    <script src="./gsap/Flip.js"></script>
     <script src="./gsap/SplitText.js"></script>
     <script src="./gsap/TextPlugin.js"></script>
     <script src="https://unpkg.com/@barba/core@2.10.3/dist/barba.umd.js"></script>

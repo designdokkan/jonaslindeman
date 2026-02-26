@@ -1,8 +1,23 @@
 function initAppAnimations() {
   initTextAnimations();
   initTextPluginAnimation();
+  initHeroGradientMotion();
+  initFeatureShowcaseBorderAnimation();
   initMenuHoverAnimations();
   initMenuToggleAnimation();
+}
+
+function getCustomMotionEase() {
+  if (typeof gsap === "undefined") return "power3.out";
+  if (typeof CustomEase !== "undefined") {
+    gsap.registerPlugin(CustomEase);
+    if (!window.__customEaseReady) {
+      CustomEase.create("custom", "M0,0 C0.9,0.2 0.1,1 1,1 ");
+      window.__customEaseReady = true;
+    }
+    return "custom";
+  }
+  return "power3.out";
 }
 
 function initTextPluginAnimation() {
@@ -17,6 +32,7 @@ function initTextPluginAnimation() {
   if (!targets.length) return;
 
   gsap.registerPlugin(TextPlugin);
+  const motionEase = getCustomMotionEase();
   const words = ["GSAP", "Framer", "Figma", "Vibe coding"];
   const timelines = [];
 
@@ -27,7 +43,7 @@ function initTextPluginAnimation() {
       tl.to(target, {
         duration: 0.55,
         text: word,
-        ease: "power2.out",
+        ease: motionEase,
       }).to({}, { duration: 1.1 });
     });
 
@@ -51,6 +67,7 @@ function initTextAnimations() {
   if (!targets.length) return;
 
   gsap.registerPlugin(ScrollTrigger, SplitText);
+  const motionEase = getCustomMotionEase();
   gsap.set(targets, { perspective: 300 });
 
   const splits = [];
@@ -67,7 +84,7 @@ function initTextAnimations() {
       stagger: 0.01,
       duration: 0.4,
       delay: index * 0.08,
-      ease: "power2.out",
+      ease: motionEase,
       clearProps: "transform,opacity",
       scrollTrigger: {
         trigger: target,
@@ -106,15 +123,19 @@ function initLoaderAnimation(onComplete) {
   const jShorts = loader.querySelectorAll(".j-short");
   const lShorts = loader.querySelectorAll(".l-short, .l_short");
   const logo = loader.querySelector(".loader-logo");
+  const hero = document.querySelector('[data-barba="container"][data-barba-namespace="main"] .hero');
+  const motionEase = getCustomMotionEase();
 
   gsap.set(loader, { yPercent: 0, autoAlpha: 1 });
-  if (logo) gsap.set(logo, { scale: 1, transformOrigin: "50% 50%" });
+  if (logo) gsap.set(logo, { autoAlpha: 0, scale: 1, transformOrigin: "50% 50%" });
   gsap.set(longLeft, { yPercent: -140 });
   gsap.set(longRight, { yPercent: 140 });
   gsap.set(jShorts, { clipPath: "inset(0% 0% 0% 100%)" });
   gsap.set(lShorts, { clipPath: "inset(0% 100% 0% 0%)" });
+  if (hero) gsap.set(hero, { y: 300 });
 
-  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+  const tl = gsap.timeline({ defaults: { ease: motionEase } });
+  if (logo) tl.set(logo, { autoAlpha: 1 }, 0);
   tl
     .to(longLeft, { yPercent: 0, duration: 0.75 })
     .to(longRight, { yPercent: 0, duration: 0.75 }, "<+0.08")
@@ -126,7 +147,7 @@ function initLoaderAnimation(onComplete) {
       scale: 0.92,
       duration: 0.28,
       delay: 0.18,
-      ease: "power2.inOut",
+      ease: motionEase,
     });
   }
 
@@ -134,9 +155,23 @@ function initLoaderAnimation(onComplete) {
     autoAlpha: 0,
     yPercent: -3,
     duration: 0.42,
-    ease: "power2.inOut",
+    ease: motionEase,
     delay: 0.08,
   });
+
+  if (hero) {
+    tl.to(
+      hero,
+      {
+        y: 0,
+        duration: 0.42,
+        ease: motionEase,
+        delay: 0.08,
+        clearProps: "transform",
+      },
+      "<"
+    );
+  }
 
   tl.call(() => {
     if (typeof window.removeLoader === "function") {
@@ -170,6 +205,134 @@ function initMenuHoverAnimations() {
   });
 }
 
+function initHeroGradientMotion() {
+  if (typeof gsap === "undefined") return;
+
+  if (typeof window.__heroGradientCleanup === "function") {
+    window.__heroGradientCleanup();
+    window.__heroGradientCleanup = null;
+  }
+
+  const scene = document.querySelector("[data-hero-gradient]");
+  if (!scene) return;
+
+  const layers = Array.from(scene.querySelectorAll(".hero-gradient-layer"));
+  if (layers.length < 3) return;
+  const target = scene.closest(".media-frame");
+  if (!target) return;
+
+  const [layerA, layerB, layerC, layerD] = layers;
+  let observer = null;
+  let ambientRunning = false;
+  const motionEase = getCustomMotionEase();
+
+  const resetMotion = () => {
+    gsap.killTweensOf([scene, ...layers]);
+    gsap.set([scene, ...layers], { x: 0, y: 0, xPercent: 0, yPercent: 0 });
+  };
+
+  const ambientConfigs = [
+    [scene, 10, 8, 4.8, 7.2],
+    [layerA, 14, 11, 5.6, 8.4],
+    [layerB, 16, 12, 6.2, 9.2],
+    [layerC, 9, 7, 6.8, 9.8],
+  ];
+  if (layerD) ambientConfigs.push([layerD, 18, 14, 4.2, 6.3]);
+
+  const drift = (element, xRange, yRange, minDuration, maxDuration) => {
+    const animate = () => {
+      if (!ambientRunning) return;
+      gsap.to(element, {
+        xPercent: gsap.utils.random(-xRange, xRange),
+        yPercent: gsap.utils.random(-yRange, yRange),
+        duration: gsap.utils.random(minDuration, maxDuration),
+        ease: motionEase,
+        onComplete: animate,
+      });
+    };
+    animate();
+  };
+
+  const startAmbientMotion = () => {
+    if (ambientRunning) return;
+    ambientRunning = true;
+    ambientConfigs.forEach(([element, xRange, yRange, minDuration, maxDuration]) => {
+      drift(element, xRange, yRange, minDuration, maxDuration);
+    });
+  };
+
+  const stopAmbientMotion = () => {
+    ambientRunning = false;
+    resetMotion();
+  };
+
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry?.isIntersecting) {
+        startAmbientMotion();
+        return;
+      }
+      stopAmbientMotion();
+    },
+    { threshold: 0.15 }
+  );
+
+  observer.observe(target);
+
+  window.__heroGradientCleanup = () => {
+    stopAmbientMotion();
+    if (observer) observer.disconnect();
+    observer = null;
+  };
+}
+
+function initFeatureShowcaseBorderAnimation() {
+  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined" || typeof Flip === "undefined") return;
+
+  if (typeof window.__featureShowcaseBorderCleanup === "function") {
+    window.__featureShowcaseBorderCleanup();
+    window.__featureShowcaseBorderCleanup = null;
+  }
+
+  gsap.registerPlugin(ScrollTrigger, Flip);
+
+  const leftBorder = getLatest("#borderLeft");
+  const wrapper = leftBorder ? leftBorder.closest(".work-svg-wrapper, .work-svg-wrapperFLIP") : null;
+  const rightBorder = wrapper ? wrapper.querySelector("#borderRight") : null;
+  if (!leftBorder || !rightBorder || !wrapper) return;
+
+  const motionEase = getCustomMotionEase();
+  let flipped = false;
+  wrapper.classList.add("work-svg-wrapper");
+  wrapper.classList.remove("work-svg-wrapperFLIP");
+
+  const flipToSides = () => {
+    if (flipped) return;
+    flipped = true;
+    const state = Flip.getState([leftBorder, rightBorder]);
+    wrapper.classList.remove("work-svg-wrapper");
+    wrapper.classList.add("work-svg-wrapperFLIP");
+    Flip.from(state, {
+      duration: 0.6,
+      ease: motionEase,
+      absolute: true,
+    });
+  };
+
+  const st = ScrollTrigger.create({
+    trigger: leftBorder,
+    start: "top 50%",
+    once: true,
+    onEnter: flipToSides,
+  });
+  requestAnimationFrame(() => ScrollTrigger.refresh());
+
+  window.__featureShowcaseBorderCleanup = () => {
+    st.kill();
+    flipped = false;
+  };
+}
+
 function initMenuToggleAnimation() {
   if (typeof gsap === "undefined") return;
 
@@ -188,6 +351,7 @@ function initMenuToggleAnimation() {
   const layers = [layerA, layerB, layerC].filter(Boolean);
   const backdrop = getOrCreateMenuBackdrop();
   if (!menu || !toggle || !bars.length) return;
+  const motionEase = getCustomMotionEase();
 
   const getMenuWidth = () => (window.matchMedia("(max-width: 900px)").matches ? "100vw" : "30vw");
 
@@ -199,7 +363,7 @@ function initMenuToggleAnimation() {
 
   const tl = gsap.timeline({
     paused: true,
-    defaults: { ease: "power3.out" },
+    defaults: { ease: motionEase },
     onStart: () => {
       menu.style.pointerEvents = "auto";
       backdrop.style.pointerEvents = "auto";
@@ -221,7 +385,7 @@ function initMenuToggleAnimation() {
     {
       autoAlpha: 0.3,
       duration: 0.3,
-      ease: "power2.out",
+      ease: motionEase,
     },
     0
   );
@@ -231,7 +395,7 @@ function initMenuToggleAnimation() {
     {
       width: () => getMenuWidth(),
       duration: 0.5,
-      ease: "power4.out",
+      ease: motionEase,
     },
     0
   );
@@ -242,7 +406,7 @@ function initMenuToggleAnimation() {
       xPercent: 0,
       duration: 0.42,
       stagger: 0.05,
-      ease: "none",
+      ease: motionEase,
     },
     0.04
   );
@@ -392,11 +556,12 @@ function splitLinkChars(link) {
 function animateMenuLinkCharsIn(link) {
   const chars = Array.from(link.querySelectorAll(".menu-char"));
   if (!chars.length) return;
+  const motionEase = getCustomMotionEase();
 
   gsap.to(shuffleChars(chars), {
     yPercent: -100,
     duration: 0.32,
-    ease: "power3.out",
+    ease: motionEase,
     stagger: 0.02,
     overwrite: true,
   });
@@ -405,11 +570,12 @@ function animateMenuLinkCharsIn(link) {
 function animateMenuLinkCharsOut(link) {
   const chars = Array.from(link.querySelectorAll(".menu-char"));
   if (!chars.length) return;
+  const motionEase = getCustomMotionEase();
 
   gsap.to(shuffleChars(chars), {
     yPercent: 0,
     duration: 0.26,
-    ease: "power3.out",
+    ease: motionEase,
     stagger: 0.018,
     overwrite: true,
   });
