@@ -19,42 +19,44 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body data-barba="wrapper">
+    <!-- Fixed primary navigation -->
+    <nav class="hero-nav" aria-label="Primary">
+      <a class="hero-logo-link" href="./index.html" aria-label="Go to home">
+        <svg
+          class="hero-logo"
+          viewBox="0 0 440 240"
+          role="img"
+          aria-label="JL logo"
+        >
+          <rect y="200" width="80" height="40" class="j-short" />
+          <rect y="200" width="80" height="40" x="120" class="j-short" />
+          <rect width="80" height="40" x="120" class="j-short" />
+          <rect x="160" width="40" height="240" class="longleft" />
+          <rect x="240" width="40" height="240" class="longright" />
+          <rect width="80" height="40" x="240" class="l-short l_short" />
+          <rect y="200" width="80" height="40" x="240" class="l-short l_short" />
+          <rect y="160" width="80" height="40" x="320" class="l-short l_short" />
+          <rect y="200" width="80" height="40" x="360" class="l-short l_short" />
+        </svg>
+      </a>
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="site-menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+    <!-- Barba page container: about namespace -->
     <div data-barba="container" data-barba-namespace="about">
       <main>
         <div class="site-wrapper">
+          <!-- About hero -->
           <section class="hero section" id="hero-start">
-            <nav class="hero-nav" aria-label="Primary">
-              <a class="hero-logo-link" href="./index.html" aria-label="Go to home">
-                <svg
-                  class="hero-logo"
-                  viewBox="0 0 440 240"
-                  role="img"
-                  aria-label="JL logo"
-                >
-                  <rect y="200" width="80" height="40" class="j-short" />
-                  <rect y="200" width="80" height="40" x="120" class="j-short" />
-                  <rect width="80" height="40" x="120" class="j-short" />
-                  <rect x="160" width="40" height="240" class="longleft" />
-                  <rect x="240" width="40" height="240" class="longright" />
-                  <rect width="80" height="40" x="240" class="l-short l_short" />
-                  <rect y="200" width="80" height="40" x="240" class="l-short l_short" />
-                  <rect y="160" width="80" height="40" x="320" class="l-short l_short" />
-                  <rect y="200" width="80" height="40" x="360" class="l-short l_short" />
-                </svg>
-              </a>
-              <button
-                class="menu-toggle"
-                type="button"
-                aria-label="Toggle menu"
-                aria-expanded="false"
-                aria-controls="site-menu"
-              >
-                <span></span>
-                <span></span>
-                <span></span>
-              </button>
-            </nav>
-
             <div class="media-frame">
               <img
                 class="media-cover"
@@ -71,6 +73,7 @@
             </h1>
           </section>
 
+          <!-- About copy and call-to-action -->
           <section class="content-section about-text-section section" aria-label="About details">
             <div class="about-text-grid grid-span-full">
               <article class="about-text-item">
@@ -100,7 +103,10 @@
         </div>
       </main>
 
-      <aside class="site-menu" id="site-menu" aria-hidden="true">
+    </div>
+
+    <!-- Slide-out menu panel -->
+    <aside class="site-menu" id="site-menu" aria-hidden="true">
         <div class="menu-panel">
           <svg class="menu-layer-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
             <rect class="menu-layer menu-layer-a" x="0" y="0" width="100" height="100" rx="0" ry="0"></rect>
@@ -125,15 +131,17 @@
           </div>
         </div>
       </aside>
-    </div>
 
+    <!-- Core runtime scripts -->
     <script src="https://unpkg.com/lucide/dist/umd/lucide.js"></script>
     <script src="./gsap/gsap.js"></script>
     <script src="./gsap/ScrollTrigger.js"></script>
     <script src="./gsap/CustomEase.js"></script>
+    <!-- Optional GSAP plugins -->
     <script src="./gsap/Flip.js"></script>
     <script src="./gsap/SplitText.js"></script>
-    <script src="./gsap/TextPlugin.js"></script>
+    <!-- <script src="./gsap/TextPlugin.js"></script> -->
+    <!-- Page transitions and app bootstrap -->
     <script src="https://unpkg.com/@barba/core@2.10.3/dist/barba.umd.js"></script>
     <script src="./gsap_animation.js"></script>
     <script src="./transitions.js"></script>

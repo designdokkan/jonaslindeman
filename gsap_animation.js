@@ -1,16 +1,21 @@
 function initAppAnimations() {
+  initNavBlendModeOnScroll();
+  initCustomCursor();
   initTextAnimations();
   initTextPluginAnimation();
   initHeroGradientMotion();
   initFeatureShowcaseBorderAnimation();
-  initMenuHoverAnimations();
+  initFeatureShowcaseScrollStory();
   initMenuToggleAnimation();
 }
 
 function getCustomMotionEase() {
   if (typeof gsap === "undefined") return "power3.out";
   if (typeof CustomEase !== "undefined") {
-    gsap.registerPlugin(CustomEase);
+    if (!window.__customEaseRegistered) {
+      gsap.registerPlugin(CustomEase);
+      window.__customEaseRegistered = true;
+    }
     if (!window.__customEaseReady) {
       CustomEase.create("custom", "M0,0 C0.9,0.2 0.1,1 1,1 ");
       window.__customEaseReady = true;
@@ -18,6 +23,59 @@ function getCustomMotionEase() {
     return "custom";
   }
   return "power3.out";
+}
+
+function scheduleScrollTriggerRefresh() {
+  if (typeof ScrollTrigger === "undefined") return;
+  if (window.__stRefreshQueued) return;
+  window.__stRefreshQueued = true;
+  requestAnimationFrame(() => {
+    window.__stRefreshQueued = false;
+    ScrollTrigger.refresh();
+  });
+}
+
+function initNavBlendModeOnScroll() {
+  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+
+  if (typeof window.__navBlendCleanup === "function") {
+    window.__navBlendCleanup();
+    window.__navBlendCleanup = null;
+  }
+
+  const nav = getLatest(".hero-nav");
+  if (!nav) return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const blendThreshold = 0.5;
+  const applyBlendMode = (progress) => {
+    nav.style.mixBlendMode = progress >= blendThreshold ? "exclusion" : "normal";
+  };
+
+  gsap.set(nav, { color: "var(--black)" });
+  applyBlendMode(0);
+
+  const tl = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: document.documentElement,
+      start: "top top",
+      end: "+=160",
+      scrub: true,
+      onUpdate: (self) => applyBlendMode(self.progress),
+      onRefresh: (self) => applyBlendMode(self.progress),
+    },
+  });
+
+  tl.to(nav, { color: "var(--white)", duration: 1 }, 0);
+
+  window.__navBlendCleanup = () => {
+    if (tl.scrollTrigger) tl.scrollTrigger.kill();
+    tl.kill();
+    nav.style.mixBlendMode = "normal";
+    nav.style.color = "var(--black)";
+  };
 }
 
 function initTextPluginAnimation() {
@@ -183,28 +241,6 @@ function initLoaderAnimation(onComplete) {
   });
 }
 
-function initMenuHoverAnimations() {
-  if (typeof gsap === "undefined") return;
-
-  const menu = getLatest(".site-menu");
-  const links = menu ? Array.from(menu.querySelectorAll("a.menu-link")) : [];
-  if (!links.length) return;
-
-  links.forEach((link) => {
-    if (!link.dataset.splitReady) {
-      splitLinkChars(link);
-      link.dataset.splitReady = "true";
-    }
-    if (link.dataset.hoverBound) return;
-    link.dataset.hoverBound = "true";
-
-    link.addEventListener("mouseenter", () => animateMenuLinkCharsIn(link));
-    link.addEventListener("mouseleave", () => animateMenuLinkCharsOut(link));
-    link.addEventListener("focus", () => animateMenuLinkCharsIn(link));
-    link.addEventListener("blur", () => animateMenuLinkCharsOut(link));
-  });
-}
-
 function initHeroGradientMotion() {
   if (typeof gsap === "undefined") return;
 
@@ -296,40 +332,201 @@ function initFeatureShowcaseBorderAnimation() {
 
   gsap.registerPlugin(ScrollTrigger, Flip);
 
-  const leftBorder = getLatest("#borderLeft");
-  const wrapper = leftBorder ? leftBorder.closest(".work-svg-wrapper, .work-svg-wrapperFLIP") : null;
+  const section = getLatest(".feature-showcase-section");
+  const wrapper = section ? section.querySelector(".work-svg-wrapper, .work-svg-wrapperFLIP") : null;
+  const leftBorder = wrapper ? wrapper.querySelector("#borderLeft") : null;
   const rightBorder = wrapper ? wrapper.querySelector("#borderRight") : null;
-  if (!leftBorder || !rightBorder || !wrapper) return;
+  const darken = section ? section.querySelector(".feature-showcase-darken") : null;
+  if (!section || !leftBorder || !rightBorder || !wrapper) return;
 
   const motionEase = getCustomMotionEase();
-  let flipped = false;
-  wrapper.classList.add("work-svg-wrapper");
-  wrapper.classList.remove("work-svg-wrapperFLIP");
+  let currentMode = "center";
+  let borderTween = null;
+  let darkenTween = null;
 
-  const flipToSides = () => {
-    if (flipped) return;
-    flipped = true;
+  const applyModeClass = (mode) => {
+    if (mode === "sides") {
+      wrapper.classList.remove("work-svg-wrapper");
+      wrapper.classList.add("work-svg-wrapperFLIP");
+      return;
+    }
+    wrapper.classList.add("work-svg-wrapper");
+    wrapper.classList.remove("work-svg-wrapperFLIP");
+  };
+
+  const animateMode = (mode, options = {}) => {
+    const { immediate = false } = options;
+    if (!immediate && mode === currentMode) return;
+    const targetDarkenAlpha = mode === "sides" ? 1 : 0;
+
+    if (borderTween) {
+      borderTween.kill();
+      borderTween = null;
+    }
+    if (darkenTween) {
+      darkenTween.kill();
+      darkenTween = null;
+    }
+
+    if (immediate) {
+      applyModeClass(mode);
+      if (darken) gsap.set(darken, { autoAlpha: targetDarkenAlpha });
+      currentMode = mode;
+      return;
+    }
+
     const state = Flip.getState([leftBorder, rightBorder]);
-    wrapper.classList.remove("work-svg-wrapper");
-    wrapper.classList.add("work-svg-wrapperFLIP");
-    Flip.from(state, {
+    applyModeClass(mode);
+    borderTween = Flip.from(state, {
       duration: 0.6,
       ease: motionEase,
       absolute: true,
+      overwrite: true,
+      onComplete: () => {
+        borderTween = null;
+      },
     });
+    if (darken) {
+      darkenTween = gsap.to(darken, {
+        autoAlpha: targetDarkenAlpha,
+        duration: 0.6,
+        ease: motionEase,
+        overwrite: true,
+        onComplete: () => {
+          darkenTween = null;
+        },
+      });
+    }
+    currentMode = mode;
   };
 
+  animateMode("center", { immediate: true });
+
   const st = ScrollTrigger.create({
-    trigger: leftBorder,
-    start: "top 50%",
-    once: true,
-    onEnter: flipToSides,
+    trigger: section,
+    start: "top top",
+    end: () => `+=${window.innerHeight * 3}`,
+    onEnter: () => animateMode("sides"),
+    onEnterBack: () => animateMode("sides"),
+    onLeave: () => animateMode("center"),
+    onLeaveBack: () => animateMode("center"),
   });
-  requestAnimationFrame(() => ScrollTrigger.refresh());
+
+  if (st.isActive) {
+    animateMode("sides", { immediate: true });
+  } else {
+    animateMode("center", { immediate: true });
+  }
+
+  scheduleScrollTriggerRefresh();
 
   window.__featureShowcaseBorderCleanup = () => {
     st.kill();
-    flipped = false;
+    if (borderTween) borderTween.kill();
+    if (darkenTween) darkenTween.kill();
+    animateMode("center", { immediate: true });
+  };
+}
+
+function initFeatureShowcaseScrollStory() {
+  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+
+  if (typeof window.__featureShowcaseStoryCleanup === "function") {
+    window.__featureShowcaseStoryCleanup();
+    window.__featureShowcaseStoryCleanup = null;
+  }
+
+  const showcase = getLatest(".feature-showcase");
+  const section = showcase ? showcase.closest(".feature-showcase-section") : null;
+  if (!showcase || !section) return;
+
+  const layer2 = showcase.querySelector(".feature-showcase-image-layer-2");
+  const layer3 = showcase.querySelector(".feature-showcase-image-layer-3");
+  const copies = Array.from(showcase.querySelectorAll(".feature-showcase-copy"));
+  if (!copies.length) return;
+
+  gsap.registerPlugin(ScrollTrigger);
+  const motionEase = getCustomMotionEase();
+  const copyLines = copies.map((copy) => getShowcaseCopyLines(copy));
+  if (!copyLines.some((lines) => lines.length)) return;
+
+  gsap.set(copies, { autoAlpha: 1 });
+  copyLines.forEach((lines) => {
+    gsap.set(lines, {
+      autoAlpha: 0,
+      yPercent: 100,
+      rotation: 25,
+      transformOrigin: "0% 100%",
+    });
+  });
+  if (layer2) gsap.set(layer2, { clipPath: "inset(100% 0% 0% 0%)" });
+  if (layer3) gsap.set(layer3, { clipPath: "inset(100% 0% 0% 0%)" });
+
+  const storyTimeline = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: section,
+      start: "top top",
+      end: () => `+=${window.innerHeight * 3}`,
+      scrub: true,
+      pin: true,
+      pinSpacing: true,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+    },
+  });
+
+  const animateLinesIn = (lines, startAt) => {
+    if (!lines.length) return;
+    storyTimeline.to(
+      lines,
+      {
+        autoAlpha: 1,
+        yPercent: 0,
+        rotation: 0,
+        duration: 0.52,
+        ease: motionEase,
+        stagger: 0.06,
+      },
+      startAt
+    );
+  };
+
+  const animateLinesOutUp = (lines, startAt) => {
+    if (!lines.length) return;
+    storyTimeline.to(
+      lines,
+      {
+        autoAlpha: 0,
+        yPercent: -100,
+        rotation: -10,
+        duration: 0.5,
+        ease: motionEase,
+        stagger: 0.05,
+      },
+      startAt
+    );
+  };
+
+  animateLinesIn(copyLines[0] || [], 0.08);
+  animateLinesOutUp(copyLines[0] || [], 0.66);
+
+  if (layer2) {
+    storyTimeline.to(layer2, { clipPath: "inset(0% 0% 0% 0%)", duration: 1 }, 1);
+  }
+  animateLinesIn(copyLines[1] || [], 1.08);
+  animateLinesOutUp(copyLines[1] || [], 1.66);
+
+  if (layer3) {
+    storyTimeline.to(layer3, { clipPath: "inset(0% 0% 0% 0%)", duration: 1 }, 2);
+  }
+  animateLinesIn(copyLines[2] || [], 2.08);
+
+  scheduleScrollTriggerRefresh();
+
+  window.__featureShowcaseStoryCleanup = () => {
+    if (storyTimeline.scrollTrigger) storyTimeline.scrollTrigger.kill();
+    storyTimeline.kill();
   };
 }
 
@@ -343,144 +540,136 @@ function initMenuToggleAnimation() {
 
   const menu = getLatest(".site-menu");
   const toggle = getLatest(".menu-toggle");
+  const nav = toggle ? toggle.closest(".hero-nav") : null;
   const bars = toggle ? Array.from(toggle.querySelectorAll("span")) : [];
   const links = menu ? Array.from(menu.querySelectorAll("a.menu-link")) : [];
-  const layerA = menu ? menu.querySelector(".menu-layer-a") : null;
-  const layerB = menu ? menu.querySelector(".menu-layer-b") : null;
-  const layerC = menu ? menu.querySelector(".menu-layer-c") : null;
-  const layers = [layerA, layerB, layerC].filter(Boolean);
-  const backdrop = getOrCreateMenuBackdrop();
-  if (!menu || !toggle || !bars.length) return;
-  const motionEase = getCustomMotionEase();
+  if (!menu || !toggle || bars.length < 3) return;
+
+  if (typeof window.__menuLinkSplitCleanup === "function") {
+    window.__menuLinkSplitCleanup();
+    window.__menuLinkSplitCleanup = null;
+  }
+  if (typeof window.__menuLinkHoverCleanup === "function") {
+    window.__menuLinkHoverCleanup();
+    window.__menuLinkHoverCleanup = null;
+  }
+
+  if (typeof SplitText !== "undefined" && links.length) {
+    gsap.registerPlugin(SplitText);
+    const splits = links.map((link) => new SplitText(link, { type: "chars", charsClass: "menu-char" }));
+    links.forEach((link) => wrapMenuCharsWithMask(link));
+    window.__menuLinkSplitCleanup = () => {
+      splits.forEach((split) => split.revert());
+    };
+
+    const hoverHandlers = [];
+    links.forEach((link) => {
+      const chars = Array.from(link.querySelectorAll(".menu-char"));
+      if (!chars.length) return;
+
+      const onEnter = () => {
+        gsap.to(shuffleChars(chars), {
+          yPercent: -100,
+          duration: 0.28,
+          ease: "power2.out",
+          stagger: 0.018,
+          overwrite: true,
+        });
+      };
+
+      const onLeave = () => {
+        gsap.to(shuffleChars(chars), {
+          yPercent: 0,
+          duration: 0.24,
+          ease: "power2.out",
+          stagger: 0.016,
+          overwrite: true,
+        });
+      };
+
+      link.addEventListener("mouseenter", onEnter);
+      link.addEventListener("mouseleave", onLeave);
+      link.addEventListener("focus", onEnter);
+      link.addEventListener("blur", onLeave);
+      hoverHandlers.push([link, onEnter, onLeave]);
+    });
+
+    window.__menuLinkHoverCleanup = () => {
+      hoverHandlers.forEach(([link, onEnter, onLeave]) => {
+        link.removeEventListener("mouseenter", onEnter);
+        link.removeEventListener("mouseleave", onLeave);
+        link.removeEventListener("focus", onEnter);
+        link.removeEventListener("blur", onLeave);
+      });
+    };
+  }
 
   const getMenuWidth = () => (window.matchMedia("(max-width: 900px)").matches ? "100vw" : "30vw");
-
-  gsap.set(menu, { width: 0, pointerEvents: "none" });
-  gsap.set(backdrop, { autoAlpha: 0, pointerEvents: "none" });
-  gsap.set(bars, { transformOrigin: "50% 50%" });
-  gsap.set(links, { xPercent: 40, yPercent: 80, autoAlpha: 0 });
-  gsap.set(layers, { xPercent: 24 });
-
-  const tl = gsap.timeline({
-    paused: true,
-    defaults: { ease: motionEase },
-    onStart: () => {
-      menu.style.pointerEvents = "auto";
-      backdrop.style.pointerEvents = "auto";
-      menu.setAttribute("aria-hidden", "false");
-      toggle.setAttribute("aria-expanded", "true");
-      document.body.classList.add("menu-open");
-    },
-    onReverseComplete: () => {
-      menu.style.pointerEvents = "none";
-      backdrop.style.pointerEvents = "none";
-      menu.setAttribute("aria-hidden", "true");
-      toggle.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("menu-open");
-    },
-  });
-
-  tl.to(
-    backdrop,
-    {
-      autoAlpha: 0.3,
-      duration: 0.3,
-      ease: motionEase,
-    },
-    0
-  );
-
-  tl.to(
-    menu,
-    {
-      width: () => getMenuWidth(),
-      duration: 0.5,
-      ease: motionEase,
-    },
-    0
-  );
-
-  tl.to(
-    layers,
-    {
-      xPercent: 0,
-      duration: 0.42,
-      stagger: 0.05,
-      ease: motionEase,
-    },
-    0.04
-  );
-
-  tl.to(
-    links,
-    {
-      xPercent: 0,
-      yPercent: 0,
-      autoAlpha: 1,
-      duration: 0.45,
-      stagger: 0.05,
-    },
-    0.16
-  )
-    .to(
-      bars[0],
-      {
-        y: 7,
-        duration: 0.22,
-      },
-      0
-    )
-    .to(
-      bars[1],
-      {
-        autoAlpha: 0,
-        duration: 0.16,
-      },
-      0
-    )
-    .to(
-      bars[2],
-      {
-        y: -7,
-        duration: 0.22,
-      },
-      0
-    );
-
-  function openMenu() {
-    tl.timeScale(1).invalidate().play();
-  }
-
-  function closeMenu() {
-    tl.timeScale(2).reverse();
-  }
+  const ease = "power2.out";
+  const syncToggleContrastState = () => {
+    const blendModeSource = nav || toggle;
+    const currentBlendMode = window.getComputedStyle(blendModeSource).mixBlendMode;
+    if (currentBlendMode === "exclusion") return;
+    toggle.classList.add("menu-toggle-contrast");
+  };
+  const resetToggleContrastState = () => {
+    toggle.classList.remove("menu-toggle-contrast");
+  };
 
   function closeMenuImmediately() {
     tl.pause(0);
     gsap.set(menu, { width: 0, pointerEvents: "none" });
-    gsap.set(backdrop, { autoAlpha: 0, pointerEvents: "none" });
-    gsap.set(links, { xPercent: 40, yPercent: 80, autoAlpha: 0 });
-    gsap.set(layers, { xPercent: 24 });
     gsap.set(bars[0], { y: 0 });
     gsap.set(bars[1], { autoAlpha: 1 });
     gsap.set(bars[2], { y: 0 });
+    gsap.set(links, { xPercent: 75, yPercent: 50, autoAlpha: 0 });
     menu.setAttribute("aria-hidden", "true");
     toggle.setAttribute("aria-expanded", "false");
     document.body.classList.remove("menu-open");
+    resetToggleContrastState();
   }
+
+  gsap.set(menu, { width: 0, pointerEvents: "none" });
+  gsap.set(bars, { transformOrigin: "50% 50%" });
+  gsap.set(links, { xPercent: 75, yPercent: 50, autoAlpha: 0 });
+
+  const tl = gsap.timeline({
+    paused: true,
+    defaults: { ease },
+    onStart: () => {
+      menu.style.pointerEvents = "auto";
+      menu.setAttribute("aria-hidden", "false");
+      toggle.setAttribute("aria-expanded", "true");
+      document.body.classList.add("menu-open");
+      syncToggleContrastState();
+    },
+    onReverseComplete: () => {
+      menu.style.pointerEvents = "none";
+      menu.setAttribute("aria-hidden", "true");
+      toggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("menu-open");
+      resetToggleContrastState();
+    },
+  });
+
+  tl.to(menu, { width: () => getMenuWidth(), duration: 0.35 }, 0)
+    .to(bars[0], { y: 7, duration: 0.2 }, 0)
+    .to(bars[2], { y: -7, duration: 0.2 }, 0)
+    .to(bars[1], { autoAlpha: 0, duration: 0.12 }, 0)
+    .to(links, { xPercent: 0, yPercent: 0, autoAlpha: 1, duration: 0.26, stagger: 0.04 }, 0.1);
 
   const onToggleClick = () => {
     if (tl.progress() > 0 && !tl.reversed()) {
-      closeMenu();
+      tl.reverse();
       return;
     }
-    openMenu();
+    tl.play();
   };
   toggle.addEventListener("click", onToggleClick);
 
   const linkHandlers = [];
   links.forEach((link) => {
-    const onLinkClick = () => closeMenu();
+    const onLinkClick = () => tl.reverse();
     link.addEventListener("click", onLinkClick);
     linkHandlers.push([link, onLinkClick]);
   });
@@ -488,19 +677,16 @@ function initMenuToggleAnimation() {
   const onDocClick = (event) => {
     if (tl.progress() === 0 || tl.reversed()) return;
     if (menu.contains(event.target) || toggle.contains(event.target)) return;
-    closeMenu();
+    tl.reverse();
   };
   document.addEventListener("click", onDocClick);
 
   const onDocKeydown = (event) => {
     if (event.key === "Escape" && tl.progress() > 0 && !tl.reversed()) {
-      closeMenu();
+      tl.reverse();
     }
   };
   document.addEventListener("keydown", onDocKeydown);
-
-  const onBackdropClick = () => closeMenu();
-  backdrop.addEventListener("click", onBackdropClick);
 
   window.__closeMenuImmediately = closeMenuImmediately;
 
@@ -512,9 +698,16 @@ function initMenuToggleAnimation() {
     });
     document.removeEventListener("click", onDocClick);
     document.removeEventListener("keydown", onDocKeydown);
-    backdrop.removeEventListener("click", onBackdropClick);
     if (window.__closeMenuImmediately === closeMenuImmediately) {
       window.__closeMenuImmediately = null;
+    }
+    if (typeof window.__menuLinkSplitCleanup === "function") {
+      window.__menuLinkSplitCleanup();
+      window.__menuLinkSplitCleanup = null;
+    }
+    if (typeof window.__menuLinkHoverCleanup === "function") {
+      window.__menuLinkHoverCleanup();
+      window.__menuLinkHoverCleanup = null;
     }
   };
 }
@@ -524,63 +717,6 @@ function getLatest(selector) {
   return nodes.length ? nodes[nodes.length - 1] : null;
 }
 
-function getOrCreateMenuBackdrop() {
-  let el = document.querySelector(".menu-backdrop");
-  if (!el) {
-    el = document.createElement("div");
-    el.className = "menu-backdrop";
-    document.body.appendChild(el);
-  }
-  return el;
-}
-
-function splitLinkChars(link) {
-  const source = (link.textContent || "").toUpperCase();
-  link.textContent = "";
-  const frag = document.createDocumentFragment();
-
-  [...source].forEach((char) => {
-    const mask = document.createElement("span");
-    mask.className = "menu-char-mask";
-
-    const span = document.createElement("span");
-    span.className = "menu-char";
-    span.textContent = char === " " ? "\u00A0" : char;
-    mask.appendChild(span);
-    frag.appendChild(mask);
-  });
-
-  link.appendChild(frag);
-}
-
-function animateMenuLinkCharsIn(link) {
-  const chars = Array.from(link.querySelectorAll(".menu-char"));
-  if (!chars.length) return;
-  const motionEase = getCustomMotionEase();
-
-  gsap.to(shuffleChars(chars), {
-    yPercent: -100,
-    duration: 0.32,
-    ease: motionEase,
-    stagger: 0.02,
-    overwrite: true,
-  });
-}
-
-function animateMenuLinkCharsOut(link) {
-  const chars = Array.from(link.querySelectorAll(".menu-char"));
-  if (!chars.length) return;
-  const motionEase = getCustomMotionEase();
-
-  gsap.to(shuffleChars(chars), {
-    yPercent: 0,
-    duration: 0.26,
-    ease: motionEase,
-    stagger: 0.018,
-    overwrite: true,
-  });
-}
-
 function shuffleChars(chars) {
   const copy = chars.slice();
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -588,4 +724,167 @@ function shuffleChars(chars) {
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy;
+}
+
+function wrapMenuCharsWithMask(link) {
+  const chars = Array.from(link.querySelectorAll(".menu-char"));
+  chars.forEach((char) => {
+    if (char.parentElement && char.parentElement.classList.contains("menu-char-mask")) return;
+    const mask = document.createElement("span");
+    mask.className = "menu-char-mask";
+    char.parentNode.insertBefore(mask, char);
+    mask.appendChild(char);
+  });
+}
+
+function getShowcaseCopyLines(copy) {
+  if (!copy) return [];
+  const indexNode = copy.querySelector(".feature-showcase-index");
+  const listNodes = Array.from(copy.querySelectorAll(".feature-showcase-list li"));
+  const rawLines = [indexNode, ...listNodes].filter(Boolean);
+  return rawLines.map((line) => ensureShowcaseLineContent(line));
+}
+
+function ensureShowcaseLineContent(line) {
+  if (!line) return null;
+  const existing = line.querySelector(".feature-showcase-line-content");
+  if (existing) return existing;
+
+  const content = document.createElement("span");
+  content.className = "feature-showcase-line-content";
+  while (line.firstChild) {
+    content.appendChild(line.firstChild);
+  }
+  line.appendChild(content);
+  return content;
+}
+
+function initCustomCursor() {
+  if (typeof window.__customCursorCleanup === "function") {
+    window.__customCursorCleanup();
+    window.__customCursorCleanup = null;
+  }
+
+  const body = document.body;
+  if (!body) return;
+
+  const canUseCustomCursor = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const cursor = getOrCreateCustomCursor();
+  if (!canUseCustomCursor || !cursor) {
+    body.classList.remove("has-custom-cursor");
+    if (cursor) {
+      cursor.classList.remove("is-visible", "has-label");
+      const label = cursor.querySelector(".custom-cursor-label");
+      if (label) label.textContent = "";
+    }
+    return;
+  }
+
+  const labelNode = cursor.querySelector(".custom-cursor-label");
+  body.classList.add("has-custom-cursor");
+
+  const setLabel = (text) => {
+    const safeText = typeof text === "string" ? text : "";
+    if (labelNode) labelNode.textContent = safeText;
+    cursor.classList.toggle("has-label", safeText.length > 0);
+  };
+
+  const handlePointerMove = (event) => {
+    cursor.style.left = `${event.clientX}px`;
+    cursor.style.top = `${event.clientY}px`;
+    cursor.classList.add("is-visible");
+    setLabel(resolveCustomCursorLabel(event.target));
+  };
+
+  const handlePointerOver = (event) => {
+    setLabel(resolveCustomCursorLabel(event.target));
+  };
+
+  const handleClick = (event) => {
+    const toggle = event.target instanceof Element ? event.target.closest(".menu-toggle") : null;
+    if (!toggle) return;
+    requestAnimationFrame(() => {
+      setLabel(resolveCustomCursorLabel(toggle));
+    });
+  };
+
+  const hideCursor = () => {
+    cursor.classList.remove("is-visible");
+    setLabel("");
+  };
+
+  document.addEventListener("pointermove", handlePointerMove);
+  document.addEventListener("pointerover", handlePointerOver);
+  document.addEventListener("click", handleClick);
+  document.documentElement.addEventListener("mouseleave", hideCursor);
+  window.addEventListener("blur", hideCursor);
+
+  window.__customCursorCleanup = () => {
+    document.removeEventListener("pointermove", handlePointerMove);
+    document.removeEventListener("pointerover", handlePointerOver);
+    document.removeEventListener("click", handleClick);
+    document.documentElement.removeEventListener("mouseleave", hideCursor);
+    window.removeEventListener("blur", hideCursor);
+    body.classList.remove("has-custom-cursor");
+    hideCursor();
+  };
+}
+
+function getOrCreateCustomCursor() {
+  let cursor = document.querySelector(".custom-cursor");
+  if (cursor) return cursor;
+
+  cursor = document.createElement("div");
+  cursor.className = "custom-cursor";
+  cursor.setAttribute("aria-hidden", "true");
+  cursor.innerHTML = '<span class="custom-cursor-inner"><span class="custom-cursor-label"></span></span>';
+  document.body.appendChild(cursor);
+  return cursor;
+}
+
+function resolveCustomCursorLabel(target) {
+  if (!(target instanceof Element)) return "";
+
+  const explicitTarget = target.closest("[data-cursor-label]");
+  if (explicitTarget) {
+    return explicitTarget.getAttribute("data-cursor-label") || "";
+  }
+
+  const homeLink = target.closest(".hero-logo-link");
+  if (homeLink) {
+    return "[ go home ]";
+  }
+
+  const menuToggle = target.closest(".menu-toggle");
+  if (menuToggle) {
+    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+    return expanded ? "[ close meny ]" : "[ open menu ]";
+  }
+
+  const showcaseTarget = target.closest(".feature-showcase, .feature-showcase-section");
+  if (showcaseTarget) {
+    return "[ see work ]";
+  }
+
+  const anchor = target.closest("a[href]");
+  if (!anchor) return "";
+  if (isExternalAnchor(anchor)) return "[ fly away ]";
+  return "[ change page ]";
+}
+
+function isExternalAnchor(anchor) {
+  if (!(anchor instanceof HTMLAnchorElement)) return false;
+  const href = anchor.getAttribute("href");
+  if (!href) return false;
+
+  if (anchor.target === "_blank") return true;
+  if (href.startsWith("mailto:") || href.startsWith("tel:")) return true;
+  if (href.startsWith("#")) return false;
+
+  try {
+    const url = new URL(href, window.location.href);
+    return url.origin !== window.location.origin;
+  } catch (_error) {
+    return false;
+  }
 }

@@ -44,6 +44,7 @@ function initBarbaTransitions(options = {}) {
           closeOpenMenuImmediately();
           const { overlay, leftPanels, rightPanels } = getSplitTransitionOverlay();
           gsap.set(overlay, { autoAlpha: 1, display: "grid" });
+          gsap.set([...leftPanels, ...rightPanels], { autoAlpha: 1, visibility: "visible" });
           gsap.set(leftPanels, { xPercent: -101 });
           gsap.set(rightPanels, { xPercent: 101 });
 
@@ -70,6 +71,7 @@ function initBarbaTransitions(options = {}) {
               defaults: { duration: 0.42, ease: getMotionEase() },
               onComplete: () => {
                 gsap.set(overlay, { autoAlpha: 0, display: "none" });
+                gsap.set([...leftPanels, ...rightPanels], { clearProps: "transform" });
                 cleanupContainerStyles(data.next.container);
               },
             })

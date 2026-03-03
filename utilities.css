@@ -1,14 +1,11 @@
 :root {
   /* Core color scale */
-  --color-white: #f7f7f7;
   --color-white: oklch(0.9761 0 0);
-  --color-black: #353535;
   --color-black: oklch(0.329 0 0);
   --color-red: oklch(0.62 0.24 25);
   --color-green: oklch(0.7294 0.2565 150.35);
-  --color-dark-blue: oklch(0.28 0.08 260);
-  --color-darker-blue: oklch(0.2 0.07 260);
   --color-selection: oklch(0.6382 0.2713 346.24);
+  --color-lightBlue: oklch(0.7656 0.1529 223.41);
 
   /* Core fluid spacing scale */
   --space-xs: clamp(0.4rem, 0.32rem + 0.3vw, 0.65rem);
@@ -70,7 +67,7 @@
   --z-menu: 1300;
   --z-menu-content: 5;
   --z-loader: 30000;
-  --z-transition: 40000;
+  --z-transition: 9000;
 
   /* Layout and grid tokens */
   --layout-grid-columns: 12;

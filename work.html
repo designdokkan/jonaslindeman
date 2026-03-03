@@ -15,72 +15,119 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body data-barba="wrapper">
+    <!-- Fixed primary navigation -->
+    <nav class="hero-nav" aria-label="Primary">
+      <a class="hero-logo-link" href="./index.html" aria-label="Go to home">
+        <svg
+          class="hero-logo"
+          viewBox="0 0 440 240"
+          role="img"
+          aria-label="JL logo"
+        >
+          <rect y="200" width="80" height="40" class="j-short" />
+          <rect y="200" width="80" height="40" x="120" class="j-short" />
+          <rect width="80" height="40" x="120" class="j-short" />
+          <rect x="160" width="40" height="240" class="longleft" />
+          <rect x="240" width="40" height="240" class="longright" />
+          <rect width="80" height="40" x="240" class="l-short l_short" />
+          <rect y="200" width="80" height="40" x="240" class="l-short l_short" />
+          <rect y="160" width="80" height="40" x="320" class="l-short l_short" />
+          <rect y="200" width="80" height="40" x="360" class="l-short l_short" />
+        </svg>
+      </a>
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="site-menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+    <!-- Barba page container: work namespace -->
     <div data-barba="container" data-barba-namespace="work">
       <main>
         <div class="site-wrapper">
-          <section class="section f-width_height" aria-label="Work showcase">
-            <nav class="hero-nav" aria-label="Primary">
-              <a class="hero-logo-link" href="./index.html" aria-label="Go to home">
-                <svg
-                  class="hero-logo"
-                  viewBox="0 0 440 240"
-                  role="img"
-                  aria-label="JL logo"
-                >
-                  <rect y="200" width="80" height="40" class="j-short" />
-                  <rect y="200" width="80" height="40" x="120" class="j-short" />
-                  <rect width="80" height="40" x="120" class="j-short" />
-                  <rect x="160" width="40" height="240" class="longleft" />
-                  <rect x="240" width="40" height="240" class="longright" />
-                  <rect width="80" height="40" x="240" class="l-short l_short" />
-                  <rect y="200" width="80" height="40" x="240" class="l-short l_short" />
-                  <rect y="160" width="80" height="40" x="320" class="l-short l_short" />
-                  <rect y="200" width="80" height="40" x="360" class="l-short l_short" />
-                </svg>
-              </a>
-              <button
-                class="menu-toggle"
-                type="button"
-                aria-label="Toggle menu"
-                aria-expanded="false"
-                aria-controls="site-menu"
-              >
-                <span></span>
-                <span></span>
-                <span></span>
-              </button>
-            </nav>
+          <!-- Work showcase -->
+          <section class="section feature-showcase-section" aria-label="Work showcase">
+            <div class="feature-showcase-pin">
+              <div class="feature-showcase overflow-visible">
+                <div class="feature-showcase-media-stack" aria-hidden="true">
+                  <img
+                    class="media-cover radius-media feature-showcase-image-layer feature-showcase-image-layer-1"
+                    src="./Assets/Images/work.webp"
+                    width="1725"
+                    height="1294"
+                    alt="Showcase background image one"
+                  />
+                  <img
+                    class="media-cover radius-media feature-showcase-image-layer feature-showcase-image-layer-2"
+                    src="https://images.unsplash.com/photo-1772289935663-80aa987be656?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    width="2340"
+                    height="3510"
+                    loading="lazy"
+                    alt="Showcase background image two"
+                  />
+                  <img
+                    class="media-cover radius-media feature-showcase-image-layer feature-showcase-image-layer-3"
+                    src="https://images.unsplash.com/photo-1772528205622-c525adf905ed?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    width="1480"
+                    height="2220"
+                    loading="lazy"
+                    alt="Showcase background image three"
+                  />
+                  <div class="feature-showcase-darken" aria-hidden="true"></div>
+                </div>
 
-            <div class="feature-showcase overflow-visible">
-              <img
-                class="media-cover radius-media"
-                src="./Assets/Images/work.webp"
-                width="1725"
-                height="1294"
-                alt="Showcase background image"
-              />
-              <div class="work-svg-wrapper" aria-hidden="true">
-                <svg id="borderLeft" class="feature-showcase-border" viewBox="0 0 80 500">
-                  <rect y="460" width="80" height="40"></rect>
-                  <rect width="80" height="40"></rect>
-                  <rect x="0" width="40" height="500"></rect>
-                </svg>
-                <svg id="borderRight" class="feature-showcase-border" viewBox="0 0 80 500">
-                  <rect y="460" width="80" height="40"></rect>
-                  <rect width="80" height="40"></rect>
-                  <rect x="40" width="40" height="500"></rect>
-                </svg>
-              </div>
+                <div class="work-svg-wrapper" aria-hidden="true">
+                  <svg id="borderLeft" class="feature-showcase-border" viewBox="0 0 80 500">
+                    <rect y="460" width="80" height="40"></rect>
+                    <rect width="80" height="40"></rect>
+                    <rect x="0" width="40" height="500"></rect>
+                  </svg>
+                  <svg id="borderRight" class="feature-showcase-border" viewBox="0 0 80 500">
+                    <rect y="460" width="80" height="40"></rect>
+                    <rect width="80" height="40"></rect>
+                    <rect x="40" width="40" height="500"></rect>
+                  </svg>
+                </div>
 
-              <div class="feature-showcase-overlay abs-fill stack-between">
-                <p class="feature-showcase-index s-text">01</p>
+                <div class="feature-showcase-overlay abs-fill">
+                  <div class="feature-showcase-copy stack-between" data-showcase-step="0">
+                    <p class="feature-showcase-index m-text">01</p>
+                    <div class="feature-showcase-bottom">
+                      <ul class="feature-showcase-list list-reset m-text">
+                        <li>Brand Strategy</li>
+                        <li>Digital Design</li>
+                        <li>Creative Direction</li>
+                      </ul>
+                    </div>
+                  </div>
 
-                <div class="feature-showcase-bottom">
-                  <ul class="feature-showcase-list list-reset s-text">
-                    <li>Brand Strategy</li>
-                    <li>Digital Design</li>
-                    <li>Creative Direction</li>
-                  </ul>
+                  <div class="feature-showcase-copy stack-between" data-showcase-step="1">
+                    <p class="feature-showcase-index m-text">02</p>
+                    <div class="feature-showcase-bottom">
+                      <ul class="feature-showcase-list list-reset m-text">
+                        <li>Editorial Systems</li>
+                        <li>Motion Language</li>
+                        <li>Campaign Platforms</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="feature-showcase-copy stack-between" data-showcase-step="2">
+                    <p class="feature-showcase-index m-text">03</p>
+                    <div class="feature-showcase-bottom">
+                      <ul class="feature-showcase-list list-reset m-text">
+                        <li>Product Narrative</li>
+                        <li>Interface Prototyping</li>
+                        <li>Design Ops</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -88,7 +135,10 @@
         </div>
       </main>
 
-      <aside class="site-menu" id="site-menu" aria-hidden="true">
+    </div>
+
+    <!-- Slide-out menu panel -->
+    <aside class="site-menu" id="site-menu" aria-hidden="true">
         <div class="menu-panel">
           <svg class="menu-layer-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
             <rect class="menu-layer menu-layer-a" x="0" y="0" width="100" height="100" rx="0" ry="0"></rect>
@@ -113,15 +163,17 @@
           </div>
         </div>
       </aside>
-    </div>
 
+    <!-- Core runtime scripts -->
     <script src="https://unpkg.com/lucide/dist/umd/lucide.js"></script>
     <script src="./gsap/gsap.js"></script>
     <script src="./gsap/ScrollTrigger.js"></script>
     <script src="./gsap/CustomEase.js"></script>
+    <!-- Optional GSAP plugins -->
     <script src="./gsap/Flip.js"></script>
     <script src="./gsap/SplitText.js"></script>
-    <script src="./gsap/TextPlugin.js"></script>
+    <!-- <script src="./gsap/TextPlugin.js"></script> -->
+    <!-- Page transitions and app bootstrap -->
     <script src="https://unpkg.com/@barba/core@2.10.3/dist/barba.umd.js"></script>
     <script src="./gsap_animation.js"></script>
     <script src="./transitions.js"></script>
